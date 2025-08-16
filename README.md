@@ -1,1 +1,298 @@
-# pos-backend
+Here’s the full README translated into English with all the details preserved and formatted for clarity:
+
+---
+
+# POS Backend (Express + TypeScript + PostgreSQL)
+
+A simple backend for a **POS** application for Anna – boutique owner
+(FakeStoreAPI → sync to local database → orders).
+Stack: **Express + TS**, **PostgreSQL**, **JWT**, **Swagger**, **Jest + Supertest**.
+
+> 🔐 Login credentials (seeded in `schema.sql`):
+> **Login:** `anna@posdemo.pl` > **Password:** `test1234`
+
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Requirements](#requirements)
+- [Quick Start (Docker)](#quick-start-docker)
+- [`.env` Configuration](#env-configuration)
+- [Database Migrations/Seed](#database-migrationsseed)
+- [Running](#running)
+- [API & Documentation](#api--documentation)
+- [cURL Examples](#curl-examples)
+- [Tests](#tests)
+- [Security](#security)
+- [Deploy](#deploy)
+- [Checklist 40/40](#checklist-4040)
+- [License](#license)
+
+---
+
+## Features
+
+- 🔐 **Auth**: email/password login, **JWT**, protective middleware.
+- 🧲 **FakeStoreAPI integration**: fetch products and **sync to PostgreSQL**.
+- 🧾 **Orders**: create orders with items and total; list orders.
+- 🧰 **Validation/sanitization**, CORS, Helmet, (optional) rate limiting.
+- 📄 **Swagger/OpenAPI** available at `/api-docs`.
+- 🧪 **Tests** (Jest + Supertest) for auth, products, orders.
+
+## Architecture
+
+```
+pos-backend/
+  node_modules/
+  src/
+    config/
+      db.ts
+      env.ts
+      swagger.ts
+    consts/
+      index.ts
+    controllers/
+      auth.controller.ts
+      order.controller.ts
+      product.controller.ts
+    middleware/
+      auth.ts
+      errorHandler.ts
+      validate.ts
+    routes/
+      auth.routes.ts
+      order.routes.ts
+      product.routes.ts
+    validators/
+      index.ts
+    app.ts
+    server.ts
+  tests/
+    auth.test.ts
+    consts.ts
+    login.test.ts
+    orders.test.ts
+    products.test.ts
+    test-db-connection.ts
+  .env
+  .env.example
+  .gitignore
+  CHANGELOG.md
+  docker-compose.yml
+  jest.config.cjs
+  jest.setup.ts
+  package-lock.json
+  package.json
+  PRD.md
+  README.md
+  schema.sql
+  TECH_SPEC.md
+  tsconfig.json
+```
+
+![POS Backend Architecture](docs/architecture.png)
+
+## Requirements
+
+- Node.js 18+
+- Docker + Docker Compose (dev)
+- PostgreSQL (locally via Docker or remotely: Railway/Neon/Supabase)
+
+## Quick Start (Docker)
+
+```bash
+# 1) Start PostgreSQL
+sudo docker-compose up -d
+
+# 2) Install dependencies
+npm install
+
+# 3) Configure .env based on .env.example
+cp .env.example .env
+
+# 4) Start dev server
+npm run dev
+```
+
+Default server: `http://localhost:5000`
+Swagger: `http://localhost:5000/api-docs`
+
+## `.env` Configuration
+
+```
+PORT=5000
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/posdb
+JWT_SECRET=supersecret
+NODE_ENV=development
+```
+
+## Database Migrations/Seed
+
+The `schema.sql` file creates the following tables:
+
+- `users`, `products`, `orders`, `order_items`
+
+* Seeds user **Anna** (`anna@posdemo.pl` / `test1234`)
+
+Load with:
+
+```bash
+psql -h 127.0.0.1 -U postgres -d posdb -f schema.sql
+```
+
+## Running
+
+Development:
+
+```bash
+npm run dev
+```
+
+Production (example):
+
+```bash
+npm run build && npm run start
+```
+
+## API & Documentation
+
+- **Swagger UI:** `GET /api-docs`
+- **Auth**
+
+  - `POST /api/auth/login` → returns `{ token }`
+
+- **Products**
+
+  - `GET /api/products/remote` (JWT) – from FakeStoreAPI
+  - `POST /api/products/sync` (JWT) – import to DB
+  - `GET /api/products/local` (JWT) – from local DB
+
+- **Orders**
+
+  - `POST /api/orders` (JWT) – create order
+  - `GET /api/orders` (JWT) – list orders
+
+### Authentication in Swagger UI
+
+Click **Authorize** → enter `Bearer <YOUR_TOKEN>` (without quotes).
+If you see `401 No token provided`, the `Authorization` header was not set.
+
+## cURL Examples
+
+**Login**
+
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"anna@posdemo.pl","password":"test1234"}'
+```
+
+**Fetch Products (remote)**
+
+```bash
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:5000/api/products/remote
+```
+
+**Sync Products to DB**
+
+```bash
+curl -X POST -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:5000/api/products/sync
+```
+
+**Create Order**
+
+```bash
+curl -X POST http://localhost:5000/api/orders \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer": "John Smith",
+    "total": 199.97,
+    "items": [
+      {"product_id": 1, "quantity": 2},
+      {"product_id": 2, "quantity": 1}
+    ]
+  }'
+```
+
+## Tests
+
+Run:
+
+```bash
+npm run test
+```
+
+```bash
+npm run test:db
+```
+
+```bash
+npm run test:mock
+```
+
+Includes:
+
+- `auth.test.ts` — login (OK/FAIL)
+- `products.test.ts` — FakeStore (requires token)
+- `orders.test.ts` — create order (requires token)
+
+> Tip: For testing without a live DB, consider a **test DB** (e.g. `posdb_test`) and a separate `.env.test`.
+
+## Security
+
+- **JWT** + `authenticate` middleware
+- **Helmet**, **CORS**
+- **express-validator** (request body validation)
+- (Optional) **rate limiting** – simple example:
+
+```ts
+// app.ts
+import rateLimit from "express-rate-limit";
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }));
+```
+
+## Deploy
+
+- **Backend:** Render / Railway
+- **DB (optional):** Railway / Neon / Supabase
+- Production environment variables:
+
+  - `DATABASE_URL` (remote)
+  - `JWT_SECRET` (strong)
+  - `PORT` (usually 10000+ on Render)
+  - `USE_MOCKS`
+
+After deployment, add the deployed URL as a server in Swagger (`servers` section in `config/swagger.ts`).
+
+## Checklist 40/40
+
+- **Auth & Security** ✅ JWT + middleware + validation
+- **API & Integrations** ✅ FakeStore (remote + sync) + custom `/orders`
+- **Architecture** ✅ controllers/services/routes/utils/config
+- **Logic & Flow** ✅ products → cart (frontend) → `POST /orders`
+- **Documentation** ✅ README + Swagger + **PRD** + **tech spec**
+- **Tests** ✅ jest + supertest (auth, products, orders)
+- **Business Context** ✅ user Anna seeded, names and flow tailored for POS
+
+---
+
+## 📄 Project Documentation
+
+The repository contains three key documentation files:
+
+| File             | Description                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| **PRD.md**       | Product Requirements Document – project goal, business requirements, use cases, and acceptance criteria. |
+| **TECH_SPEC.md** | Technical specification – architecture, tech stack, folder structure, database, and test plan.           |
+| **CHANGELOG.md** | Change history – documents all changes in the project with dates and versions.                           |
+
+### How to use the docs:
+
+1. **Start with PRD.md** – understand what the system does and for whom.
+2. **Then read TECH_SPEC.md** – learn the technical details of implementation.
+3. **Finally check CHANGELOG.md** – review history and versioning.
+
+This ensures any new developer or reviewer can quickly get into the project, understand its logic, and follow its history.
