@@ -1,7 +1,3 @@
-Here’s the full README translated into English with all the details preserved and formatted for clarity:
-
----
-
 # POS Backend (Express + TypeScript + PostgreSQL)
 
 A simple backend for a **POS** application for Anna – boutique owner
@@ -124,6 +120,7 @@ PORT=5000
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/posdb
 JWT_SECRET=supersecret
 NODE_ENV=development
+USE_MOCKS=true
 ```
 
 ## Database Migrations/Seed
@@ -250,7 +247,7 @@ Includes:
 
 ```ts
 // app.ts
-import rateLimit from "express-rate-limit";
+import rateLimit from 'express-rate-limit';
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }));
 ```
 
@@ -273,7 +270,7 @@ After deployment, add the deployed URL as a server in Swagger (`servers` section
 - **API & Integrations** ✅ FakeStore (remote + sync) + custom `/orders`
 - **Architecture** ✅ controllers/services/routes/utils/config
 - **Logic & Flow** ✅ products → cart (frontend) → `POST /orders`
-- **Documentation** ✅ README + Swagger + **PRD** + **tech spec**
+- **Documentation** ✅ README + Swagger + PRD + tech spec
 - **Tests** ✅ jest + supertest (auth, products, orders)
 - **Business Context** ✅ user Anna seeded, names and flow tailored for POS
 
