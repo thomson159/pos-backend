@@ -115,11 +115,12 @@ describe('Products API - DataBase', () => {
     }
   });
 
-  it('✅ should fetch local products from DB - only one test product in db', async () => {
+  it('✅ should fetch local products from DB', async () => {
     const res = await request(app).get(linkProductsLocal).set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+
     if (res.body.length > 0) {
       const order = res.body[0];
       expect(order).toHaveProperty('id');
@@ -136,23 +137,6 @@ describe('Products API - DataBase', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('message', dbMessage);
-  });
-
-  it('✅ should fetch local products from DB - not empty', async () => {
-    const res = await request(app).get(linkProductsLocal).set('Authorization', `Bearer ${token}`);
-
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-
-    if (res.body.length > 0) {
-      const order = res.body[0];
-      expect(order).toHaveProperty('id');
-      expect(order).toHaveProperty('title');
-      expect(order).toHaveProperty('price');
-      expect(order).toHaveProperty('category');
-      expect(order).toHaveProperty('description');
-      expect(order).toHaveProperty('image');
-    }
   });
 
   it('❌ should block local products request without token', async () => {
