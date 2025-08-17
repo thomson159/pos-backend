@@ -105,22 +105,24 @@ import { pool } from '../src/config/db';
 import bcrypt from 'bcrypt';
 
 describe('Orders API - with DataBase', () => {
-  beforeEach(async () => {
-    await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+  if (!useMocks) {
+    beforeEach(async () => {
+      await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
 
-    const hash = await bcrypt.hash(correctPassword, 10);
-    await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+      const hash = await bcrypt.hash(correctPassword, 10);
+      await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
 
-    const res = await request(app)
-      .post(linkLogin)
-      .send({ email: correctEmail, password: correctPassword });
+      const res = await request(app)
+        .post(linkLogin)
+        .send({ email: correctEmail, password: correctPassword });
 
-    token = res.body.token;
-  });
+      token = res.body.token;
+    });
 
-  afterAll(async () => {
-    await pool.end();
-  });
+    afterAll(async () => {
+      await pool.end();
+    });
+  }
 
   it('❌ should block order creation without token', async () => {
     await request(app).post(linkLogin).send({ email: wrongEmail, password: correctPassword });

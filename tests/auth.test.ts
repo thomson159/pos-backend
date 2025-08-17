@@ -35,16 +35,18 @@ import bcrypt from 'bcrypt';
 import request from 'supertest';
 
 describe('Auth API - DataBase', () => {
-  beforeEach(async () => {
-    await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+  if (!useMocks) {
+    beforeEach(async () => {
+      await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
 
-    const hash = await bcrypt.hash(correctPassword, 10);
-    await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
-  });
+      const hash = await bcrypt.hash(correctPassword, 10);
+      await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+    });
 
-  afterAll(async () => {
-    await pool.end();
-  });
+    afterAll(async () => {
+      await pool.end();
+    });
+  }
 
   it('✅ should login with correct credentials', async () => {
     const res = await request(app)
