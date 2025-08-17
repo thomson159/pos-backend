@@ -89,7 +89,7 @@ if (useMocks) {
       const authHeader = req.headers?.authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: noTokenProvided });
       }
 
       const response: CreateOrder = { message: orderCreated, orderId: 1 };
@@ -101,13 +101,25 @@ if (useMocks) {
 
 import request from 'supertest';
 import app from '../src/app';
+import { pool } from '../src/config/db';
+import bcrypt from 'bcrypt';
 
 describe('Orders API - with DataBase', () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
+    await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+
+    const hash = await bcrypt.hash(correctPassword, 10);
+    await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+
     const res = await request(app)
       .post(linkLogin)
       .send({ email: correctEmail, password: correctPassword });
+
     token = res.body.token;
+  });
+
+  afterAll(async () => {
+    await pool.end();
   });
 
   it('❌ should block order creation without token', async () => {

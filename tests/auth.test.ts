@@ -7,6 +7,8 @@ import {
   correctPassword,
   linkLogin,
 } from './consts';
+import { NextFunction } from 'express';
+import { invalidCredentials } from 'src/consts';
 
 const useMocks = getUseMocks();
 
@@ -27,12 +29,23 @@ if (useMocks) {
   }));
 }
 
-import { NextFunction } from 'express';
 import app from 'src/app';
-import { invalidCredentials } from 'src/consts';
+import { pool } from '../src/config/db';
+import bcrypt from 'bcrypt';
 import request from 'supertest';
 
 describe('Auth API - DataBase', () => {
+  beforeEach(async () => {
+    await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+
+    const hash = await bcrypt.hash(correctPassword, 10);
+    await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
   it('✅ should login with correct credentials', async () => {
     const res = await request(app)
       .post(linkLogin)

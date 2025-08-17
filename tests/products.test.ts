@@ -8,8 +8,9 @@ import {
   linkProductsLocal,
   linkProductsSync,
 } from './consts';
-import { dbMessage, invalidCredentials } from 'src/consts';
+import { dbMessage, invalidCredentials, noTokenProvided } from 'src/consts';
 import { NextFunction } from 'express';
+import { Product } from 'src/consts/types';
 
 let token: string;
 const item: Product = {
@@ -44,25 +45,27 @@ if (useMocks) {
       const authHeader = req.headers?.authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: noTokenProvided });
       }
 
       return res.status(200).json([item]);
     }),
+
     getLocalProducts: jest.fn((req, res) => {
       const authHeader = req.headers?.authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: noTokenProvided });
       }
 
       return res.status(200).json([item]);
     }),
+
     syncProducts: jest.fn((req, res) => {
       const authHeader = req.headers?.authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({ message: noTokenProvided });
       }
 
       return res.status(200).json({ message: dbMessage });
@@ -72,16 +75,27 @@ if (useMocks) {
 
 import request from 'supertest';
 import app from '../src/app';
-import { Product } from 'src/consts/types';
-
-beforeAll(async () => {
-  const res = await request(app)
-    .post(linkLogin)
-    .send({ email: correctEmail, password: correctPassword });
-  token = res.body.token;
-});
+import { pool } from '../src/config/db';
+import bcrypt from 'bcrypt';
 
 describe('Products API - DataBase', () => {
+  beforeEach(async () => {
+    await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+
+    const hash = await bcrypt.hash(correctPassword, 10);
+    await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+
+    const res = await request(app)
+      .post(linkLogin)
+      .send({ email: correctEmail, password: correctPassword });
+
+    token = res.body.token;
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
   it('✅ should fetch remote products from FakeStoreAPI', async () => {
     const res = await request(app).get(linkProductsRemote).set('Authorization', `Bearer ${token}`);
 
@@ -142,18 +156,18 @@ describe('Products API - DataBase', () => {
   it('❌ should block local products request without token', async () => {
     const res = await request(app).get(linkProductsLocal);
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty('message', 'Unauthorized');
+    expect(res.body).toHaveProperty('message', noTokenProvided);
   });
 
   it('❌ should block sync products request without token', async () => {
     const res = await request(app).post(linkProductsSync);
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty('message', 'Unauthorized');
+    expect(res.body).toHaveProperty('message', noTokenProvided);
   });
 
   it('❌ should block remote products request without token', async () => {
     const res = await request(app).get(linkProductsRemote);
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty('message', 'Unauthorized');
+    expect(res.body).toHaveProperty('message', noTokenProvided);
   });
 });

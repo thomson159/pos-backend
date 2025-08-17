@@ -22,6 +22,7 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     return res.status(status).json({
       success: false,
       message,
+      errors: err.errors || [],
     });
   }
 
@@ -29,6 +30,7 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     return res.status(401).json({
       success: false,
       message: err.message,
+      errors: err.errors || [],
     });
   }
 
@@ -36,11 +38,13 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     return res.status(err.status).json({
       success: false,
       message: err.message || requestError,
+      errors: err.errors || [],
     });
   }
 
   res.status(500).json({
     success: false,
     message: serverError,
+    errors: err.errors || [],
   });
 }
