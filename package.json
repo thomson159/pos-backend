@@ -7,7 +7,10 @@
     "dev": "tsx watch src/server.ts",
     "test": "jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:mock": "USE_MOCKS=true jest --passWithNoTests --runInBand --detectOpenHandles",
-    "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles"
+    "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles",
+    "tsoa:routes": "tsoa routes",
+    "tsoa:spec": "tsoa spec",
+    "tsoa:build": "tsoa routes & tsoa spec"
   },
   "dependencies": {
     "axios": "^1.11.0",
@@ -20,7 +23,8 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tsoa": "^6.6.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
