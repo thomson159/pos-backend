@@ -7,6 +7,7 @@ import orderRoutes from './routes/order.routes';
 import { errorHandler } from './middleware/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger';
+import { RegisterRoutes } from './routes-tsoa/routes';
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+RegisterRoutes(app);
 
 app.use(errorHandler);
 
