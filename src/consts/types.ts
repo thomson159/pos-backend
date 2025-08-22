@@ -9,6 +9,7 @@ export type ConfigType = {
   port: number | string;
   dbUrl: string;
   jwtSecret: string;
+  jwtExpiresIn: string | number;
 };
 
 export type SwaggerOptionsType = {
