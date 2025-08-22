@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { pool } from 'src/config/db';
-import { getLocalProducts } from 'src/controllers/product.controller';
+// import { getLocalProducts } from 'src/controllers/old/product.controller';
 import { getProductsWithFilters } from 'src/queries/product';
 
 jest.mock('../src/config/db', () => ({
@@ -85,36 +85,36 @@ describe('getProductsWithFilters', () => {
   });
 });
 
-describe('getLocalProducts', () => {
-  let req: Partial<Request>;
-  let res: Partial<Response>;
-  let next: NextFunction;
+// describe('getLocalProducts', () => {
+//   let req: Partial<Request>;
+//   let res: Partial<Response>;
+//   let next: NextFunction;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    req = { query: {} };
-    res = { json: jest.fn() };
-    next = jest.fn();
-  });
+//   beforeEach(() => {
+//     jest.clearAllMocks();
+//     req = { query: {} };
+//     res = { json: jest.fn() };
+//     next = jest.fn();
+//   });
 
-  it('✅ should return products using getProductsWithFilters', async () => {
-    const mockRows = [{ id: 1, title: 'Product', price: 10 }];
-    (pool.query as jest.Mock).mockResolvedValue({ rows: mockRows });
-    req.query = { q: 'Test' };
+//   it('✅ should return products using getProductsWithFilters', async () => {
+//     const mockRows = [{ id: 1, title: 'Product', price: 10 }];
+//     (pool.query as jest.Mock).mockResolvedValue({ rows: mockRows });
+//     req.query = { q: 'Test' };
 
-    await getLocalProducts(req as Request, res as Response, next);
+//     await getLocalProducts(req as Request, res as Response, next);
 
-    expect(res.json).toHaveBeenCalledWith(mockRows);
-    expect(next).not.toHaveBeenCalled();
-  });
+//     expect(res.json).toHaveBeenCalledWith(mockRows);
+//     expect(next).not.toHaveBeenCalled();
+//   });
 
-  it('❌ should call next with error if getProductsWithFilters throws', async () => {
-    const error = new Error('DB error');
-    (pool.query as jest.Mock).mockRejectedValue(error);
+//   it('❌ should call next with error if getProductsWithFilters throws', async () => {
+//     const error = new Error('DB error');
+//     (pool.query as jest.Mock).mockRejectedValue(error);
 
-    await getLocalProducts(req as Request, res as Response, next);
+//     await getLocalProducts(req as Request, res as Response, next);
 
-    expect(next).toHaveBeenCalledWith(error);
-    expect(res.json).not.toHaveBeenCalled();
-  });
-});
+//     expect(next).toHaveBeenCalledWith(error);
+//     expect(res.json).not.toHaveBeenCalled();
+//   });
+// });

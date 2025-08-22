@@ -39,6 +39,33 @@
         "required": ["email", "password"],
         "type": "object",
         "additionalProperties": false
+      },
+      "Product": {
+        "properties": {
+          "id": {
+            "type": "number",
+            "format": "double"
+          },
+          "title": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "price", "category", "description", "image"],
+        "type": "object",
+        "additionalProperties": false
       }
     },
     "securitySchemes": {}
@@ -50,31 +77,6 @@
     "contact": {}
   },
   "paths": {
-    "/hello": {
-      "get": {
-        "operationId": "GetHello",
-        "responses": {
-          "200": {
-            "description": "Ok",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["message"],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [],
-        "parameters": []
-      }
-    },
     "/auth/login": {
       "post": {
         "operationId": "Login",
@@ -129,6 +131,103 @@
             }
           }
         }
+      }
+    },
+    "/products/remote": {
+      "get": {
+        "operationId": "GetRemoteProducts",
+        "responses": {
+          "200": {
+            "description": "Products fetched from remote API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch remote products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/products/local": {
+      "get": {
+        "operationId": "GetLocalProducts",
+        "responses": {
+          "200": {
+            "description": "Products fetched from remote API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch local products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/hello": {
+      "get": {
+        "operationId": "GetHello",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["message"],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": []
       }
     }
   },

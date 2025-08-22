@@ -7,7 +7,7 @@
 //   linkProductsRemote,
 //   linkProductsLocal,
 //   linkProductsSync,
-// } from '../consts';
+// } from './consts';
 // import { dbMessage, invalidCredentials, noTokenProvided } from 'src/consts';
 // import { NextFunction } from 'express';
 // import { Product } from 'src/consts/types';
@@ -74,9 +74,9 @@
 // }
 
 // import request from 'supertest';
+// import app from '../src/app';
+// import { pool } from '../src/config/db';
 // import bcrypt from 'bcrypt';
-// import app from 'src/app';
-// import { pool } from 'src/config/db';
 
 // describe('Products API - DataBase', () => {
 //   if (!useMocks) {

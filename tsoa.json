@@ -9,6 +9,7 @@
   "routes": {
     "basePath": "/",
     "routesDir": "src/routes-tsoa",
-    "routesFileName": "routes.ts"
+    "routesFileName": "routes.ts",
+    "authenticationModule": "./src/middleware/auth.ts"
   }
 }
