@@ -1,24 +1,21 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
-import { invalidTokenMessage, noTokenProvided } from 'src/consts';
-import { AuthenticatedRequest, TokenPayload } from 'src/consts/types';
-
-class HttpError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.status = status;
-  }
-}
+import {
+  noTokenProvided,
+  invalidTokenMessage,
+  TokenPayload,
+  AuthenticatedRequest,
+  HttpError,
+} from 'src/consts/tsoa';
 
 export async function expressAuthentication(
   req: AuthenticatedRequest,
   securityName: string,
   scopes?: string[],
   res?: Response,
-): Promise<any> {
-  const authHeader = req.headers['authorization'];
+): Promise<TokenPayload> {
+  const authHeader = req.headers['authorization'] as string | undefined;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new HttpError(noTokenProvided, 401);

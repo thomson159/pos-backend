@@ -1,12 +1,9 @@
 import { Controller, Get, Route, Response, Security, SuccessResponse } from 'tsoa';
 import axios from 'axios';
 import { pool } from '../config/db';
-import { AppError, ErrorResponse } from './AuthController';
+import { AppError, fakestoreapi, SELECT_PRODUCT, serverError } from 'src/consts/tsoa';
 
-export const SELECT_PRODUCT = 'SELECT * FROM products';
-export const url = 'https://fakestoreapi.com/products';
-
-export interface Product {
+interface Product {
   id: number;
   title: string;
   price: number;
@@ -15,31 +12,35 @@ export interface Product {
   image: string;
 }
 
+interface ProductErrorResponse {
+  message: string;
+}
+
 @Route('products')
 export class ProductsController extends Controller {
   @Get('remote')
   @Security('bearerAuth')
-  @SuccessResponse(200, 'Products fetched from remote API')
-  @Response<ErrorResponse>(500, 'Failed to fetch remote products')
+  @SuccessResponse(200)
+  @Response<ProductErrorResponse>(500, serverError)
   public async getRemoteProducts(): Promise<Product[]> {
     try {
-      const { data } = await axios.get<Product[]>(url);
+      const { data } = await axios.get<Product[]>(fakestoreapi);
       return data;
     } catch (err) {
-      throw new AppError(500, 'Failed to fetch remote products');
+      throw new AppError(500, serverError);
     }
   }
 
   @Get('local')
   @Security('bearerAuth')
-  @SuccessResponse(200, 'Products fetched from remote API')
-  @Response<ErrorResponse>(500, 'Failed to fetch local products')
+  @SuccessResponse(200)
+  @Response<ProductErrorResponse>(500, serverError)
   public async getLocalProducts(): Promise<Product[]> {
     try {
       const result = await pool.query<Product>(SELECT_PRODUCT);
       return result.rows;
     } catch (err) {
-      throw new AppError(500, 'Failed to fetch local products');
+      throw new AppError(500, serverError);
     }
   }
 }

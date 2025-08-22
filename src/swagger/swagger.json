@@ -7,6 +7,43 @@
     "requestBodies": {},
     "responses": {},
     "schemas": {
+      "Product": {
+        "properties": {
+          "id": {
+            "type": "number",
+            "format": "double"
+          },
+          "title": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "price", "category", "description", "image"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ProductErrorResponse": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"],
+        "type": "object",
+        "additionalProperties": false
+      },
       "LoginSuccess": {
         "properties": {
           "token": {
@@ -39,33 +76,6 @@
         "required": ["email", "password"],
         "type": "object",
         "additionalProperties": false
-      },
-      "Product": {
-        "properties": {
-          "id": {
-            "type": "number",
-            "format": "double"
-          },
-          "title": {
-            "type": "string"
-          },
-          "price": {
-            "type": "number",
-            "format": "double"
-          },
-          "category": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "image": {
-            "type": "string"
-          }
-        },
-        "required": ["id", "title", "price", "category", "description", "image"],
-        "type": "object",
-        "additionalProperties": false
       }
     },
     "securitySchemes": {}
@@ -77,68 +87,12 @@
     "contact": {}
   },
   "paths": {
-    "/auth/login": {
-      "post": {
-        "operationId": "Login",
-        "responses": {
-          "200": {
-            "description": "Login success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginSuccess"
-                }
-              }
-            },
-            "headers": {
-              "LoginSuccess": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginSuccess"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [],
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginBody"
-              }
-            }
-          }
-        }
-      }
-    },
     "/products/remote": {
       "get": {
         "operationId": "GetRemoteProducts",
         "responses": {
           "200": {
-            "description": "Products fetched from remote API",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
@@ -151,11 +105,11 @@
             }
           },
           "500": {
-            "description": "Failed to fetch remote products",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProductErrorResponse"
                 }
               }
             }
@@ -174,7 +128,7 @@
         "operationId": "GetLocalProducts",
         "responses": {
           "200": {
-            "description": "Products fetched from remote API",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
@@ -187,11 +141,11 @@
             }
           },
           "500": {
-            "description": "Failed to fetch local products",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ProductErrorResponse"
                 }
               }
             }
@@ -228,6 +182,55 @@
         },
         "security": [],
         "parameters": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          }
+        }
       }
     }
   },

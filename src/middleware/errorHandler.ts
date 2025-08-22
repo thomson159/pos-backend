@@ -1,16 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { ValidateError } from '@tsoa/runtime';
 import {
+  AppError,
   foreignKeyViolation,
-  uniqueViolation,
-  notNullViolation,
   invalidTextRepresentation,
+  notNullViolation,
+  PgError,
   requestError,
   serverError,
-} from 'src/consts';
-import { AppError } from 'src/controllers/AuthController';
+  uniqueViolation,
+} from 'src/consts/tsoa';
 
-export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   const pgErrorMap: Record<string, { status: number; message: string }> = {
     '23503': { status: 400, message: foreignKeyViolation },
     '23505': { status: 400, message: uniqueViolation },
@@ -26,22 +27,34 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     });
   }
 
-  if (err.code && pgErrorMap[err.code]) {
-    const { status, message } = pgErrorMap[err.code];
-    return res.status(status).json({ success: false, message, errors: err.errors || [] });
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    typeof (err as PgError).code === 'string'
+  ) {
+    const pgErr = err as PgError;
+    const mapping = pgErrorMap[pgErr.code];
+    if (mapping) {
+      return res
+        .status(mapping.status)
+        .json({ success: false, message: mapping.message, errors: pgErr.errors || [] });
+    }
   }
 
-  if (err instanceof AppError || err.status) {
-    return res.status(err.status || 400).json({
+  if (err instanceof AppError || (typeof err === 'object' && err !== null && 'status' in err)) {
+    const appErr = err as AppError & { errors?: unknown[] };
+    return res.status(appErr.status || 400).json({
       success: false,
-      message: err.message || requestError,
-      errors: err.errors || [],
+      message: appErr.message || requestError,
+      errors: appErr.errors || [],
     });
   }
 
+  const unknownErr = err as { errors?: unknown[] };
   res.status(500).json({
     success: false,
     message: serverError,
-    errors: err.errors || [],
+    errors: unknownErr.errors || [],
   });
 }

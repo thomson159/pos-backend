@@ -1,7 +1,6 @@
 import { ValidationError } from 'express-validator';
 import { Request, Response } from 'express';
 import { dbMessage, orderCreated } from '.';
-import { JwtPayload } from 'jsonwebtoken';
 
 export type ValidationErrorType = ValidationError & { param: string };
 
@@ -39,30 +38,8 @@ export type SwaggerOptionsType = {
   apis: string[];
 };
 
-export type ProductListResponse = Product[];
-
 export type SyncSuccessResponse = {
   message: typeof dbMessage;
-};
-
-export type ErrorResponse = {
-  message: string;
-};
-
-export type UserFromDB = {
-  id: number;
-  email: string;
-  password: string;
-  role: string;
-};
-
-export type Product = {
-  id: number;
-  title: string;
-  price: number;
-  category: string;
-  description: string;
-  image: string;
 };
 
 export type Order = {
@@ -94,24 +71,10 @@ export type CreateOrderBody = {
   total: number;
 };
 
-export type LoginBody = {
-  email: string;
-  password: string;
-};
-
 export type CreateOrder = {
   message: typeof orderCreated;
   orderId: number;
 };
-
-type LoginSuccessResponse = {
-  token: string;
-};
-
-export type LoginResponse = LoginSuccessResponse | ErrorResponse;
-export type LoginResponseType = Response<LoginResponse>;
-export type LoginRequestType = Request<{}, {}, LoginBody>;
-export type LoginPromiseType = Promise<LoginResponseType | ErrorResponse | undefined>;
 
 export type CreateOrderResponseType = Response<CreateOrder>;
 export type CreateOrderRequestType = Request<{}, {}, CreateOrderBody>;
@@ -120,23 +83,6 @@ export type CreateOrderPromiseType = Promise<CreateOrderResponseType | undefined
 export type OrderResponseType = Response<OrderWithItems[]>;
 export type OrderPromiseType = Promise<OrderResponseType | undefined>;
 
-export type SyncType = SyncSuccessResponse | ErrorResponse;
-export type SyncResponseType = Response<SyncType>;
-export type SyncPromiseType = Promise<SyncResponseType | undefined>;
-
-export type ProductResponseType = Response<ProductListResponse>;
-export type ProductPromiseType = Promise<ProductResponseType | undefined>;
-
-export interface AppError extends Error {
-  status?: number;
-  code?: string;
-}
-
-export interface TokenPayload extends JwtPayload {
-  id: string;
-  email: string;
-}
-
-export interface AuthenticatedRequest extends Request {
-  user?: TokenPayload;
-}
+// export type SyncType = SyncSuccessResponse | ErrorResponse;
+// export type SyncResponseType = Response<SyncType>;
+// export type SyncPromiseType = Promise<SyncResponseType | undefined>;

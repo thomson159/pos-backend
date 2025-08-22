@@ -1,4 +1,13 @@
-import { mockedToken, getUseMocks, wrongPass, correctEmail, correctPassword } from './consts';
+import {
+  mockedToken,
+  getUseMocks,
+  wrongPass,
+  correctEmail,
+  correctPassword,
+  DELETE_USER,
+  INSERT_USER,
+} from './consts';
+import { invalidCredentials, serverError } from 'src/consts/tsoa';
 
 let pool: any;
 let bcrypt: any;
@@ -26,7 +35,6 @@ if (useMocks) {
 import { pool as realPool } from '../src/config/db';
 import bcryptLib from 'bcrypt';
 import jwtLib from 'jsonwebtoken';
-import { invalidCredentials, serverError } from 'src/consts';
 import { AuthController } from 'src/controllers/AuthController';
 
 pool = useMocks ? require('../src/config/db').pool : realPool;
@@ -39,18 +47,11 @@ describe('AuthController.login', () => {
   if (!useMocks) {
     beforeAll(async () => {
       const hashed = await bcrypt.hash(correctPassword, 10);
-      await pool.query(
-        `
-        INSERT INTO users (email, password)
-        VALUES ($1, $2)
-        ON CONFLICT (email) DO NOTHING
-      `,
-        [correctEmail, hashed],
-      );
+      await pool.query(INSERT_USER, [correctEmail, hashed]);
     });
 
     afterAll(async () => {
-      await pool.query(`DELETE FROM users WHERE email = $1`, [correctEmail]);
+      await pool.query(DELETE_USER, [correctEmail]);
       await pool.end();
     });
   }

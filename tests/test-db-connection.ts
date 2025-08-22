@@ -1,5 +1,5 @@
 import { pool } from 'src/config/db';
-import { SELECT_USERS, user, error } from 'src/consts';
+import { SELECT_USERS, user, error } from './consts';
 
 async function testDB() {
   try {

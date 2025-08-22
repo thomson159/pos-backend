@@ -4,11 +4,11 @@
 import type { TsoaRoute } from '@tsoa/runtime';
 import { fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { AuthController } from './../controllers/AuthController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductsController } from './../controllers/ProductsController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { HelloController } from './../controllers/HelloController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AuthController } from './../controllers/AuthController';
 import { expressAuthentication } from './../middleware/auth';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -23,6 +23,27 @@ const expressAuthenticationRecasted = expressAuthentication as (
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+  Product: {
+    dataType: 'refObject',
+    properties: {
+      id: { dataType: 'double', required: true },
+      title: { dataType: 'string', required: true },
+      price: { dataType: 'double', required: true },
+      category: { dataType: 'string', required: true },
+      description: { dataType: 'string', required: true },
+      image: { dataType: 'string', required: true },
+    },
+    additionalProperties: false,
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  ProductErrorResponse: {
+    dataType: 'refObject',
+    properties: {
+      message: { dataType: 'string', required: true },
+    },
+    additionalProperties: false,
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
   LoginSuccess: {
     dataType: 'refObject',
     properties: {
@@ -48,19 +69,6 @@ const models: TsoaRoute.Models = {
     additionalProperties: false,
   },
   // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-  Product: {
-    dataType: 'refObject',
-    properties: {
-      id: { dataType: 'double', required: true },
-      title: { dataType: 'string', required: true },
-      price: { dataType: 'double', required: true },
-      category: { dataType: 'string', required: true },
-      description: { dataType: 'string', required: true },
-      image: { dataType: 'string', required: true },
-    },
-    additionalProperties: false,
-  },
-  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new ExpressTemplateService(models, {
   noImplicitAdditionalProperties: 'throw-on-extras',
@@ -75,41 +83,6 @@ export function RegisterRoutes(app: Router) {
   //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
   // ###########################################################################################################
 
-  const argsAuthController_login: Record<string, TsoaRoute.ParameterSchema> = {
-    body: { in: 'body', name: 'body', required: true, ref: 'LoginBody' },
-  };
-  app.post(
-    '/auth/login',
-    ...fetchMiddlewares<RequestHandler>(AuthController),
-    ...fetchMiddlewares<RequestHandler>(AuthController.prototype.login),
-
-    async function AuthController_login(request: ExRequest, response: ExResponse, next: any) {
-      // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-      let validatedArgs: any[] = [];
-      try {
-        validatedArgs = templateService.getValidatedArgs({
-          args: argsAuthController_login,
-          request,
-          response,
-        });
-
-        const controller = new AuthController();
-
-        await templateService.apiHandler({
-          methodName: 'login',
-          controller,
-          response,
-          next,
-          validatedArgs,
-          successStatus: 200,
-        });
-      } catch (err) {
-        return next(err);
-      }
-    },
-  );
-  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
   const argsProductsController_getRemoteProducts: Record<string, TsoaRoute.ParameterSchema> = {};
   app.get(
     '/products/remote',
@@ -212,6 +185,41 @@ export function RegisterRoutes(app: Router) {
           next,
           validatedArgs,
           successStatus: undefined,
+        });
+      } catch (err) {
+        return next(err);
+      }
+    },
+  );
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  const argsAuthController_login: Record<string, TsoaRoute.ParameterSchema> = {
+    body: { in: 'body', name: 'body', required: true, ref: 'LoginBody' },
+  };
+  app.post(
+    '/auth/login',
+    ...fetchMiddlewares<RequestHandler>(AuthController),
+    ...fetchMiddlewares<RequestHandler>(AuthController.prototype.login),
+
+    async function AuthController_login(request: ExRequest, response: ExResponse, next: any) {
+      // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+      let validatedArgs: any[] = [];
+      try {
+        validatedArgs = templateService.getValidatedArgs({
+          args: argsAuthController_login,
+          request,
+          response,
+        });
+
+        const controller = new AuthController();
+
+        await templateService.apiHandler({
+          methodName: 'login',
+          controller,
+          response,
+          next,
+          validatedArgs,
+          successStatus: 200,
         });
       } catch (err) {
         return next(err);
