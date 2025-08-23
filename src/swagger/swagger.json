@@ -7,6 +7,39 @@
     "requestBodies": {},
     "responses": {},
     "schemas": {
+      "LoginSuccess": {
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": ["token"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LoginBody": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "password"],
+        "type": "object",
+        "additionalProperties": false
+      },
       "Product": {
         "properties": {
           "id": {
@@ -81,37 +114,34 @@
         "properties": {
           "product_id": {
             "type": "number",
-            "format": "double",
-            "default": 0
+            "format": "double"
           },
           "quantity": {
             "type": "number",
-            "format": "double",
-            "default": 1
+            "format": "double"
           }
         },
+        "required": ["product_id", "quantity"],
         "type": "object",
         "additionalProperties": false
       },
       "CreateOrderBody": {
         "properties": {
           "customer": {
-            "type": "string",
-            "default": ""
+            "type": "string"
           },
           "total": {
             "type": "number",
-            "format": "double",
-            "default": 0.01
+            "format": "double"
           },
           "items": {
             "items": {
               "$ref": "#/components/schemas/OrderItem"
             },
-            "type": "array",
-            "default": []
+            "type": "array"
           }
         },
+        "required": ["customer", "total", "items"],
         "type": "object",
         "additionalProperties": false
       },
@@ -163,39 +193,6 @@
         "required": ["id", "customer", "total", "created_at", "items"],
         "type": "object",
         "additionalProperties": false
-      },
-      "LoginSuccess": {
-        "properties": {
-          "token": {
-            "type": "string"
-          }
-        },
-        "required": ["token"],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "ErrorResponse": {
-        "properties": {
-          "message": {
-            "type": "string"
-          }
-        },
-        "required": ["message"],
-        "type": "object",
-        "additionalProperties": false
-      },
-      "LoginBody": {
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": ["email", "password"],
-        "type": "object",
-        "additionalProperties": false
       }
     },
     "securitySchemes": {}
@@ -207,6 +204,55 @@
     "contact": {}
   },
   "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/remote": {
       "get": {
         "operationId": "GetRemoteProducts",
@@ -223,6 +269,16 @@
                 },
                 "examples": {
                   "Example 1": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -266,6 +322,16 @@
               }
             }
           },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "",
             "content": {
@@ -304,6 +370,16 @@
               }
             }
           },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "",
             "content": {
@@ -336,6 +412,16 @@
                 },
                 "examples": {
                   "Example 1": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -387,6 +473,16 @@
               }
             }
           },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "",
             "content": {
@@ -429,55 +525,6 @@
         },
         "security": [],
         "parameters": []
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "operationId": "Login",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginSuccess"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [],
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginBody"
-              }
-            }
-          }
-        }
       }
     }
   },
