@@ -1,10 +1,21 @@
-import { Controller, Get, Route, Response, Security, SuccessResponse, Post } from 'tsoa';
+import { Controller, Get, Route, Response, Security, SuccessResponse, Post, Example } from 'tsoa';
 import axios from 'axios';
 import { pool } from '../config/db';
-import { fakestoreapi, INSERT_PRODUCT, SELECT_PRODUCT, serverError, syncSuccess } from 'src/consts';
+import {
+  fakestoreapi,
+  getProductsExample,
+  INSERT_PRODUCT,
+  invalidCredentials,
+  invalidTokenMessage,
+  noTokenProvided,
+  SELECT_PRODUCT,
+  serverError,
+  syncSuccess,
+} from 'src/consts';
 import { AppError } from 'src/helpers';
+import { ErrorResponse } from './AuthController';
 
-interface Product {
+export interface Product {
   id: number;
   title: string;
   price: number;
@@ -26,6 +37,8 @@ export class ProductsController extends Controller {
   @Get('remote')
   @Security('bearerAuth')
   @SuccessResponse(200)
+  @Example<Product[]>(getProductsExample)
+  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<ProductErrorResponse>(500, serverError)
   public async getRemoteProducts(): Promise<Product[]> {
     try {
@@ -39,6 +52,8 @@ export class ProductsController extends Controller {
   @Get('local')
   @Security('bearerAuth')
   @SuccessResponse(200)
+  @Example<Product[]>(getProductsExample)
+  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<ProductErrorResponse>(500, serverError)
   public async getLocalProducts(): Promise<Product[]> {
     try {
@@ -52,6 +67,8 @@ export class ProductsController extends Controller {
   @Post('sync')
   @Security('bearerAuth')
   @SuccessResponse(200)
+  @Example<SyncSuccessResponse>({ message: syncSuccess })
+  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<ProductErrorResponse>(500, serverError)
   public async syncProducts(): Promise<SyncSuccessResponse> {
     try {

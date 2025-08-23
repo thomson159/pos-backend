@@ -17,12 +17,15 @@ import {
   getOrderExample,
   INSERT_ORDER,
   INSERT_ORDER_ITEM,
+  invalidTokenMessage,
+  noTokenProvided,
   orderCreated,
   SELECT_ORDER_WITH_ITEMS,
   serverError,
 } from 'src/consts';
 import { IsString, IsNumber, Min, ValidateNested, ArrayMinSize, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ErrorResponse } from './AuthController';
 
 export class OrderItem {
   @IsInt({ message: 'Product ID must be an integer greater than 0' })
@@ -78,6 +81,7 @@ export class OrdersController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<CreateOrderResponse>(createOrderExample)
+  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<OrderErrorResponse>(500, serverError)
   public async createOrder(@Body() body: CreateOrderBody): Promise<CreateOrderResponse> {
     const { customer, items, total } = body;
@@ -101,6 +105,7 @@ export class OrdersController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<OrderWithItems[]>(getOrderExample)
+  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<OrderErrorResponse>(500, serverError)
   public async getOrders(): Promise<OrderWithItems[]> {
     try {

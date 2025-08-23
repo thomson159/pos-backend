@@ -6,7 +6,7 @@ import { config } from '../config/env';
 import { UserDb, invalidCredentials, SELECT_AUTH, serverError } from 'src/consts';
 import { AppError } from 'src/helpers';
 
-interface ErrorResponse {
+export interface ErrorResponse {
   message: string;
 }
 

@@ -29,7 +29,7 @@ const options: SwaggerOptionsType = {
       },
     ],
   },
-  apis: ['./src/routes/*.ts'],
+  apis: ['./src/routes-tsoa/routes.ts'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

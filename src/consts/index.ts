@@ -1,12 +1,15 @@
 import { JwtPayload } from 'jsonwebtoken';
 import { Request } from 'express';
 import { OrderWithItems, CreateOrderResponse } from 'src/controllers/OrdersController';
+import { Product } from 'src/controllers/ProductsController';
 
 export const fakestoreapi = 'https://fakestoreapi.com/products';
 
 export const invalidCredentials = 'Invalid credentials';
+
 export const invalidTokenMessage = 'Invalid token';
 export const noTokenProvided = 'No token provided';
+
 export const validateError = 'Validation errors';
 export const requestError = 'Request error';
 export const serverError = 'A server error occurred';
@@ -96,6 +99,17 @@ export type SwaggerOptionsType = {
 };
 
 export const SELECT_ORDER = 'SELECT * FROM orders ORDER BY id DESC';
+
+export const getProductsExample: Product[] = [
+  {
+    id: 1,
+    title: 'Pen',
+    price: 10,
+    category: 'Standard',
+    description: 'Super pen',
+    image: 'pen',
+  },
+];
 
 export const getOrderExample: OrderWithItems[] = [
   {

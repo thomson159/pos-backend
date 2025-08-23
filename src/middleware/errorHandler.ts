@@ -21,10 +21,16 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   };
 
   if (err instanceof ValidateError) {
+    const details = Object.entries(err.fields).map(([key, value]) => ({
+      property: key.replace(/^body\./, ''),
+      constraints: { isValid: value.message },
+      value: value.value,
+    }));
+
     return res.status(400).json({
       success: false,
       message: validateError,
-      errors: err.fields,
+      details,
     });
   }
 
@@ -39,7 +45,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     if (mapping) {
       return res
         .status(mapping.status)
-        .json({ success: false, message: mapping.message, errors: pgErr.errors || [] });
+        .json({ success: false, message: mapping.message, details: pgErr.errors || [] });
     }
   }
 
@@ -48,7 +54,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return res.status(appErr.status || 400).json({
       success: false,
       message: appErr.message || requestError,
-      errors: appErr.errors || [],
+      details: appErr.errors || [],
     });
   }
 
@@ -56,6 +62,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   res.status(500).json({
     success: false,
     message: serverError,
-    errors: unknownErr.errors || [],
+    details: unknownErr.errors || [],
   });
 }

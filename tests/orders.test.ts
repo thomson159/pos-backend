@@ -51,13 +51,6 @@ describe('Orders API - with DataBase', () => {
     }
   });
 
-  it('❌ should reject get all orders without token', async () => {
-    const res = await request(app).get(linkOrders);
-
-    expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty('message', noTokenProvided);
-  });
-
   it('✅ should create a new order', async () => {
     const orderData = {
       customer: 'Jan Kowalski',
@@ -80,6 +73,13 @@ describe('Orders API - with DataBase', () => {
     const orderData = { customer: 'Anon', total: 10, items: [] };
 
     const res = await request(app).post(linkOrders).send(orderData);
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('message', noTokenProvided);
+  });
+
+  it('❌ should reject get all orders without token', async () => {
+    const res = await request(app).get(linkOrders);
 
     expect(res.status).toBe(401);
     expect(res.body).toHaveProperty('message', noTokenProvided);
