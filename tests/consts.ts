@@ -23,3 +23,7 @@ export const INSERT_USER = `
         VALUES ($1, $2)
         ON CONFLICT (email) DO NOTHING
       `;
+
+export const invalidFloat = 'invalid float number';
+export const invalidObject = 'invalid object';
+export const invalidString = 'invalid string value';

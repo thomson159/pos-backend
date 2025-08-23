@@ -23,8 +23,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   if (err instanceof ValidateError) {
     const details = Object.entries(err.fields).map(([key, value]) => ({
       property: key.replace(/^body\./, ''),
-      constraints: { isValid: value.message },
-      value: value.value,
+      message: value.message,
     }));
 
     return res.status(400).json({
@@ -51,10 +50,17 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
 
   if (err instanceof AppError || (typeof err === 'object' && err !== null && 'status' in err)) {
     const appErr = err as AppError & { errors?: unknown[] };
+    const details =
+      Array.isArray(appErr.errors) && appErr.errors.length > 0
+        ? appErr.errors.map((e: any) => ({
+            property: e.property,
+            message: e.message,
+          }))
+        : [];
     return res.status(appErr.status || 400).json({
       success: false,
       message: appErr.message || requestError,
-      details: appErr.errors || [],
+      details,
     });
   }
 

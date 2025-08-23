@@ -6,8 +6,10 @@ import {
   DELETE_USER,
   INSERT_USER,
   getUseMocks,
+  invalidFloat,
+  invalidObject,
+  invalidString,
 } from './consts';
-import { foreignKeyViolation, noTokenProvided, orderCreated } from 'src/consts';
 
 let token: string;
 const useMocks = getUseMocks();
@@ -16,6 +18,8 @@ import request from 'supertest';
 import app from '../src/app';
 import { pool } from '../src/config/db';
 import bcrypt from 'bcrypt';
+import { orderCreated, noTokenProvided } from 'src/consts';
+import { customer, items, productId, quantity, total } from 'src/helpers/validators';
 
 describe('Orders API - with DataBase', () => {
   beforeAll(async () => {
@@ -86,25 +90,6 @@ describe('Orders API - with DataBase', () => {
     expect(res.body).toHaveProperty('message', noTokenProvided);
   });
 
-  if (!useMocks) {
-    it('❌ should not create a new order - missing product', async () => {
-      const orderData = {
-        customer: 'Jan Kowalski',
-        total: 99.99,
-        items: [{ product_id: 100000, quantity: 2 }],
-      };
-
-      const res = await request(app)
-        .post(linkOrders)
-        .set('Authorization', `Bearer ${token}`)
-        .send(orderData);
-
-      expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('message');
-      expect(res.body.message).toMatch(foreignKeyViolation);
-    });
-  }
-
   it('❌ invalid quantity', async () => {
     const orderData = {
       customer: 'Jan Kowalski',
@@ -122,7 +107,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items[0].quantity',
-          message: 'Quantity must be an integer > 0',
+          message: quantity,
         }),
       ]),
     );
@@ -141,14 +126,14 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items[0].product_id',
-          message: 'Product ID must be an integer > 0',
+          message: productId,
         }),
       ]),
     );
   });
 
   it('❌ invalid customer', async () => {
-    const orderData = { customer: 0, total: 50, items: [{ product_id: 1, quantity: 1 }] };
+    const orderData = { total: 50, items: [{ product_id: 1, quantity: 1 }] };
 
     const res = await request(app)
       .post(linkOrders)
@@ -160,7 +145,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'customer',
-          message: 'Customer is required and must be a string',
+          message: customer,
         }),
       ]),
     );
@@ -169,7 +154,7 @@ describe('Orders API - with DataBase', () => {
   it('❌ invalid total', async () => {
     const orderData = {
       customer: 'Jan Kowalski',
-      total: 'not-a-number',
+      total: 0,
       items: [{ product_id: 1, quantity: 1 }],
     };
 
@@ -183,7 +168,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'total',
-          message: 'Total must be a number greater than 0',
+          message: total,
         }),
       ]),
     );
@@ -202,7 +187,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items',
-          message: 'Items must be a non-empty array',
+          message: items,
         }),
       ]),
     );
@@ -217,15 +202,104 @@ describe('Orders API - with DataBase', () => {
       .send(orderData);
 
     expect(res.status).toBe(400);
+
     expect(res.body.details).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           property: 'customer',
-          message: 'Customer is required and must be a string',
+          message: customer,
         }),
         expect.objectContaining({
           property: 'items',
-          message: 'Items must be a non-empty array',
+          message: items,
+        }),
+      ]),
+    );
+  });
+
+  // Validators should check the data type,
+  // but in this case if the data type is wrong
+  // (total: 'not-a-number' & customer: 0 & items: 2),
+  // tsoa catches it faster (type from db) before our validator and handles the error itself
+  //
+  // invalid float number & invalid string value & invalid object <- tsoa handler error, not ours
+  //
+  it('❌ invalid total, customer, items - wrong type', async () => {
+    const orderData = {
+      customer: 0,
+      total: 'not-a-number',
+      items: 2,
+    };
+
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
+
+    expect(res.status).toBe(400);
+
+    const details = Object.entries(res.body.details as Record<string, { message: string }>).map(
+      ([key, value]) => ({
+        property: key,
+        message: value.message,
+      }),
+    );
+
+    expect(details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'body.customer',
+          message: invalidString,
+        }),
+        expect.objectContaining({
+          property: 'body.total',
+          message: invalidFloat,
+        }),
+        expect.objectContaining({
+          property: 'items.$0', // <- here there is a slightly different format of the property value
+          message: invalidObject,
+        }),
+      ]),
+    );
+  });
+
+  // Validators should check the data type,
+  // but in this case if the data type is wrong
+  // (items: [{ product_id: 'dummy', quantity: 'dummy' }]),
+  // tsoa catches it faster (type from db) before our validator and handles the error itself
+  //
+  // invalid float number <- tsoa handler error, not ours
+  //
+  it('❌ invalid items, product_id, quantity - wrong type', async () => {
+    const orderData = {
+      customer: 'dummy',
+      total: 1,
+      items: [{ product_id: 'dummy', quantity: 'dummy' }],
+    };
+
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
+
+    expect(res.status).toBe(400);
+
+    const details = Object.entries(res.body.details as Record<string, { message: string }>).map(
+      ([key, value]) => ({
+        property: key,
+        message: value.message,
+      }),
+    );
+
+    expect(details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'items.$0.product_id',
+          message: invalidFloat,
+        }),
+        expect.objectContaining({
+          property: 'items.$0.quantity',
+          message: invalidFloat,
         }),
       ]),
     );

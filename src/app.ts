@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger';
 import { RegisterRoutes } from './routes-tsoa/routes';
 import { ValidateError } from '@tsoa/runtime';
+import { validationFailed } from './helpers/validators';
 
 const app = express();
 
@@ -18,11 +19,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 RegisterRoutes(app);
 
+// tsoa error handler response
 app.use(function (err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof ValidateError) {
     return res.status(400).json({
       success: false,
-      message: 'Validation failed',
+      message: validationFailed,
       details: err.fields,
     });
   }

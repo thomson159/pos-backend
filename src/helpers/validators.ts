@@ -1,20 +1,85 @@
-import { body, param, ValidationChain } from 'express-validator';
-
-export const customer = 'The "customer" field is required and must be a string';
+export const customer = 'The "customer" field is required and must be a string (1–255 chars)';
 export const total = 'Total must be a number greater than 0';
-export const items = 'Product list is required';
 export const productId = 'Product ID must be an integer greater than 0';
 export const quantity = 'Quantity must be an integer greater than 0';
-export const idInfo = 'ID must be an integer greater than 0';
+export const items = 'Items must be a non-empty array';
+export const duplicates = 'Items must not contain duplicate product IDs';
+export const createdAt = 'The "created_at" field cannot be set manually';
 
-export const createOrderValidator: ValidationChain[] = [
-  body('customer').isString().withMessage(customer),
-  body('total').isFloat({ gt: 0 }).withMessage(total),
-  body('items').isArray({ min: 1 }).withMessage(items),
-  body('items.*.product_id').isInt({ min: 1 }).withMessage(productId),
-  body('items.*.quantity').isInt({ min: 1 }).withMessage(quantity),
-];
+export const validationFailed = 'Validation failed';
 
-export const idParamValidator: ValidationChain[] = [
-  param('id').isInt({ min: 1 }).withMessage(idInfo),
-];
+export function validateOrder(body: any): {
+  valid: boolean;
+  errors: { property: string; message: string }[];
+} {
+  const errors: { property: string; message: string }[] = [];
+
+  if (!body || typeof body !== 'object') {
+    errors.push({ property: 'body', message: 'Request body must be an object' });
+    return { valid: false, errors };
+  }
+
+  if (
+    body.customer === undefined ||
+    typeof body.customer !== 'string' ||
+    !body.customer.trim() ||
+    body.customer.length > 255
+  ) {
+    errors.push({
+      property: 'customer',
+      message: customer,
+    });
+  }
+
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    errors.push({
+      property: 'items',
+      message: items,
+    });
+  } else {
+    const productIds = new Set<number>();
+
+    body.items.forEach((item: any, index: number) => {
+      if (!Number.isInteger(item.product_id) || item.product_id < 1) {
+        errors.push({
+          property: `items[${index}].product_id`,
+          message: productId,
+        });
+      } else {
+        if (productIds.has(item.product_id)) {
+          errors.push({
+            property: `items[${index}].product_id`,
+            message: duplicates,
+          });
+        }
+        productIds.add(item.product_id);
+      }
+
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        errors.push({
+          property: `items[${index}].quantity`,
+          message: quantity,
+        });
+      }
+    });
+
+    if (
+      errors.filter((e) => e.property.startsWith('items')).length === 0 &&
+      (typeof body.total !== 'number' || body.total <= 0)
+    ) {
+      errors.push({
+        property: 'total',
+        message: total,
+      });
+    }
+  }
+
+  if (body.created_at !== undefined) {
+    errors.push({
+      property: 'created_at',
+      message: createdAt,
+    });
+  }
+
+  return { valid: errors.length === 0, errors };
+}

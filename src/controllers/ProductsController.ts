@@ -5,8 +5,6 @@ import {
   fakestoreapi,
   getProductsExample,
   INSERT_PRODUCT,
-  invalidCredentials,
-  invalidTokenMessage,
   noTokenProvided,
   SELECT_PRODUCT,
   serverError,
@@ -38,7 +36,7 @@ export class ProductsController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<Product[]>(getProductsExample)
-  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
+  @Response<ErrorResponse>(401, noTokenProvided)
   @Response<ProductErrorResponse>(500, serverError)
   public async getRemoteProducts(): Promise<Product[]> {
     try {
@@ -53,7 +51,7 @@ export class ProductsController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<Product[]>(getProductsExample)
-  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
+  @Response<ErrorResponse>(401, noTokenProvided)
   @Response<ProductErrorResponse>(500, serverError)
   public async getLocalProducts(): Promise<Product[]> {
     try {
@@ -68,7 +66,7 @@ export class ProductsController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<SyncSuccessResponse>({ message: syncSuccess })
-  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
+  @Response<ErrorResponse>(401, noTokenProvided)
   @Response<ProductErrorResponse>(500, serverError)
   public async syncProducts(): Promise<SyncSuccessResponse> {
     try {

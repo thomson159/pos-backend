@@ -48,6 +48,7 @@ export const SELECT_ORDER_WITH_ITEMS = `
   LEFT JOIN products p ON oi.product_id = p.id
   ORDER BY o.id, oi.product_id;
 `;
+// export const SELECT_ORDER = 'SELECT * FROM orders ORDER BY id DESC';
 
 export interface UserDb {
   id: number;
@@ -97,8 +98,6 @@ export type SwaggerOptionsType = {
   };
   apis: string[];
 };
-
-export const SELECT_ORDER = 'SELECT * FROM orders ORDER BY id DESC';
 
 export const getProductsExample: Product[] = [
   {
