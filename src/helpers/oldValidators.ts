@@ -1,5 +1,11 @@
 import { body, param, ValidationChain } from 'express-validator';
-import { customer, idInfo, items, productId, quantity, total } from 'src/consts';
+
+export const customer = 'The "customer" field is required and must be a string';
+export const total = 'Total must be a number greater than 0';
+export const items = 'Product list is required';
+export const productId = 'Product ID must be an integer greater than 0';
+export const quantity = 'Quantity must be an integer greater than 0';
+export const idInfo = 'ID must be an integer greater than 0';
 
 export const createOrderValidator: ValidationChain[] = [
   body('customer').isString().withMessage(customer),

@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult, ValidationError } from 'express-validator';
-import { validateError } from 'src/consts/tsoa';
-import { ValidationErrorType } from 'src/consts/types';
+import { validateError } from 'src/consts';
+
+export type ValidationErrorType = ValidationError & { param: string };
 
 export function hasParam(err: ValidationError): err is ValidationErrorType {
   return typeof (err as ValidationErrorType).param === 'string';

@@ -1,5 +1,6 @@
 {
   "entryFile": "src/app.ts",
+  "validate": true,
   "noImplicitAdditionalProperties": "throw-on-extras",
   "controllerPathGlobs": ["src/controllers/**/*.ts"],
   "spec": {
@@ -8,6 +9,7 @@
   },
   "routes": {
     "basePath": "/",
+    "validateModels": true,
     "routesDir": "src/routes-tsoa",
     "routesFileName": "routes.ts",
     "authenticationModule": "./src/middleware/auth.ts"

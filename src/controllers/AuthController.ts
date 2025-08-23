@@ -3,7 +3,8 @@ import { pool } from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/env';
-import { UserDb, AppError, invalidCredentials, SELECT_AUTH, serverError } from 'src/consts/tsoa';
+import { UserDb, invalidCredentials, SELECT_AUTH, serverError } from 'src/consts';
+import { AppError } from 'src/helpers';
 
 interface ErrorResponse {
   message: string;

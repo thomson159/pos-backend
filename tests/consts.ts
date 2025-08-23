@@ -7,9 +7,8 @@ export const wrongEmail = 'wrong@posdemo.pl';
 export const linkLogin = '/auth/login';
 export const linkProductsRemote = '/products/remote';
 export const linkProductsLocal = '/products/local';
-
-export const linkProductsSyncApi = '/api/products/sync';
-export const linkOrders = '/api/orders';
+export const linkProductsSync = '/products/sync';
+export const linkOrders = '/orders';
 
 export const correctPassword = 'test1234'; // schema.sql
 export const correctEmail = 'anna@posdemo.pl'; // schema.sql

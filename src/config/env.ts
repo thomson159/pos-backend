@@ -1,5 +1,12 @@
 import dotenv from 'dotenv';
-import { ConfigType } from 'src/consts/types';
+
+export type ConfigType = {
+  port: number | string;
+  dbUrl: string;
+  jwtSecret: string;
+  jwtExpiresIn: string | number;
+};
+
 dotenv.config();
 
 export const config: ConfigType = {

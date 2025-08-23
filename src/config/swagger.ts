@@ -1,4 +1,4 @@
-import { SwaggerOptionsType } from 'src/consts/types';
+import { SwaggerOptionsType } from 'src/consts';
 import swaggerJsdoc from 'swagger-jsdoc';
 
 const options: SwaggerOptionsType = {

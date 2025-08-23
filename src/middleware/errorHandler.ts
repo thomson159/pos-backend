@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ValidateError } from '@tsoa/runtime';
 import {
-  AppError,
   foreignKeyViolation,
   invalidTextRepresentation,
   notNullViolation,
@@ -9,7 +8,9 @@ import {
   requestError,
   serverError,
   uniqueViolation,
-} from 'src/consts/tsoa';
+  validateError,
+} from 'src/consts';
+import { AppError } from 'src/helpers';
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   const pgErrorMap: Record<string, { status: number; message: string }> = {
@@ -22,7 +23,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   if (err instanceof ValidateError) {
     return res.status(400).json({
       success: false,
-      message: 'Validation Failed',
+      message: validateError,
       errors: err.fields,
     });
   }

@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from 'src/app';
 import { pool } from 'src/config/db';
 import bcrypt from 'bcrypt';
-import { noTokenProvided } from 'src/consts/tsoa';
+import { noTokenProvided, syncSuccess } from 'src/consts';
 import {
   linkProductsRemote,
   linkProductsLocal,
@@ -11,6 +11,7 @@ import {
   correctEmail,
   correctPassword,
   linkLogin,
+  linkProductsSync,
 } from './consts';
 
 let token: string;
@@ -35,6 +36,13 @@ describe('Products API - DataBase', () => {
   afterAll(async () => {
     await pool.query(DELETE_USER, [correctEmail]);
     await pool.end();
+  });
+
+  it('✅ should fetch sync products', async () => {
+    const res = await request(app).post(linkProductsSync).set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('message', syncSuccess);
   });
 
   it('✅ should fetch remote products from FakeStoreAPI', async () => {
@@ -79,6 +87,12 @@ describe('Products API - DataBase', () => {
 
   it('❌ should block remote products request without token', async () => {
     const res = await request(app).get(linkProductsRemote);
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('message', noTokenProvided);
+  });
+
+  it('❌ should block sync products request without token', async () => {
+    const res = await request(app).post(linkProductsSync);
     expect(res.status).toBe(401);
     expect(res.body).toHaveProperty('message', noTokenProvided);
   });

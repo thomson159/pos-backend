@@ -7,7 +7,7 @@ import {
   DELETE_USER,
   INSERT_USER,
 } from './consts';
-import { invalidCredentials, serverError } from 'src/consts/tsoa';
+import { invalidCredentials, serverError } from 'src/consts';
 
 let pool: any;
 let bcrypt: any;

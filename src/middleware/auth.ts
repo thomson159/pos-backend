@@ -1,4 +1,4 @@
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
 import {
@@ -6,8 +6,8 @@ import {
   invalidTokenMessage,
   TokenPayload,
   AuthenticatedRequest,
-  HttpError,
-} from 'src/consts/tsoa';
+} from 'src/consts';
+import { HttpError } from 'src/helpers';
 
 export async function expressAuthentication(
   req: AuthenticatedRequest,

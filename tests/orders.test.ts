@@ -1,360 +1,228 @@
-// import {
-//   foreignKeyViolation,
-//   orderCreated,
-//   noTokenProvided,
-//   validateError,
-//   quantity,
-//   productId,
-//   customer,
-//   total,
-//   items,
-//   invalidCredentials,
-// } from 'src/consts';
-// import {
-//   linkLogin,
-//   correctEmail,
-//   correctPassword,
-//   getUseMocks,
-//   mockedToken,
-//   linkOrders,
-//   wrongEmail,
-// } from './consts';
-// import { Request, Response, NextFunction } from 'express';
-// import { CreateOrder, OrderWithItems } from 'src/consts/types';
+import {
+  linkLogin,
+  correctEmail,
+  correctPassword,
+  linkOrders,
+  DELETE_USER,
+  INSERT_USER,
+} from './consts';
+import { noTokenProvided, orderCreated } from 'src/consts';
 
-// let token: string;
+let token: string;
 // const useMocks = getUseMocks();
 
-// if (useMocks) {
-//   jest.mock('../src/controllers/auth.controller', () => ({
-//     login: jest.fn((req, res) => {
-//       const { email, password } = req.body;
-//       if (email === correctEmail && password === correctPassword) {
-//         return res.status(200).json({ token: mockedToken });
-//       } else {
-//         return res.status(401).json({ message: invalidCredentials });
-//       }
-//     }),
-//   }));
+import request from 'supertest';
+import app from '../src/app';
+import { pool } from '../src/config/db';
+import bcrypt from 'bcrypt';
 
-//   jest.mock('../src/middleware/auth', () => ({
-//     authenticate: (req: Request, res: Response, next: NextFunction) => {
-//       const authHeader = req.headers['authorization'] as string | undefined;
+describe('Orders API - with DataBase', () => {
+  beforeAll(async () => {
+    const hashed = await bcrypt.hash(correctPassword, 10);
+    await pool.query(INSERT_USER, [correctEmail, hashed]);
+  });
 
-//       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//         return res.status(401).json({
-//           success: false,
-//           message: noTokenProvided,
-//           errors: [],
-//         });
-//       }
+  beforeEach(async () => {
+    const res = await request(app)
+      .post(linkLogin)
+      .send({ email: correctEmail, password: correctPassword });
 
-//       next();
-//     },
-//   }));
+    token = res.body.token || res.body?.data?.token;
+    if (!token) throw new Error('Token not received, check login credentials');
+  });
 
-//   jest.mock('../src/controllers/order.controller', () => ({
-//     getOrders: jest.fn((req, res) => {
-//       const authHeader = req.headers?.authorization;
+  afterAll(async () => {
+    await pool.query(DELETE_USER, [correctEmail]);
+    await pool.end();
+  });
 
-//       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//         return res.status(401).json({
-//           success: false,
-//           message: noTokenProvided,
-//           errors: [],
-//         });
-//       }
+  it('✅ should get all orders', async () => {
+    const res = await request(app).get(linkOrders).set('Authorization', `Bearer ${token}`);
 
-//       const response: OrderWithItems[] = [
-//         {
-//           id: 1,
-//           customer: 'Jan Kowalski',
-//           total: 10,
-//           created_at: new Date().toISOString(),
-//           items: [
-//             {
-//               id: 1,
-//               order_id: 1,
-//               product_id: 1,
-//               quantity: 1,
-//             },
-//           ],
-//         },
-//       ];
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
 
-//       return res.status(200).json(response);
-//     }),
+    if (res.body.length > 0) {
+      const order = res.body[0];
+      expect(order).toHaveProperty('id');
+      expect(order).toHaveProperty('customer');
+      expect(order).toHaveProperty('total');
+      expect(order).toHaveProperty('created_at');
+    }
+  });
 
-//     createOrder: jest.fn((req, res) => {
-//       const authHeader = req.headers?.authorization;
+  it('❌ should reject get all orders without token', async () => {
+    const res = await request(app).get(linkOrders);
 
-//       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//         return res.status(401).json({ message: noTokenProvided });
-//       }
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('message', noTokenProvided);
+  });
 
-//       const response: CreateOrder = { message: orderCreated, orderId: 1 };
+  it('✅ should create a new order', async () => {
+    const orderData = {
+      customer: 'Jan Kowalski',
+      total: 99.99,
+      items: [{ product_id: 1, quantity: 2 }],
+    };
 
-//       return res.status(200).json(response);
-//     }),
-//   }));
-// }
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-// import request from 'supertest';
-// import app from '../src/app';
-// import { pool } from '../src/config/db';
-// import bcrypt from 'bcrypt';
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('orderId');
+    expect(typeof res.body.orderId).toBe('number');
+    expect(res.body).toHaveProperty('message', orderCreated);
+  });
 
-// describe('Orders API - with DataBase', () => {
-//   if (!useMocks) {
-//     beforeEach(async () => {
-//       await pool.query('DELETE FROM users WHERE email = $1', [correctEmail]);
+  it('❌ should block order creation without token', async () => {
+    const orderData = { customer: 'Anon', total: 10, items: [] };
 
-//       const hash = await bcrypt.hash(correctPassword, 10);
-//       await pool.query(`INSERT INTO users (email, password) VALUES ($1, $2)`, [correctEmail, hash]);
+    const res = await request(app).post(linkOrders).send(orderData);
 
-//       const res = await request(app)
-//         .post(linkLogin)
-//         .send({ email: correctEmail, password: correctPassword });
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('message', noTokenProvided);
+  });
 
-//       token = res.body.token;
-//     });
+  // if (!useMocks) {
+  //   it('❌ should not create a new order - missing product', async () => {
+  //     const orderData = {
+  //       customer: 'Jan Kowalski',
+  //       total: 99.99,
+  //       items: [{ product_id: 100000, quantity: 2 }],
+  //     };
 
-//     afterAll(async () => {
-//       await pool.end();
-//     });
-//   }
+  //     const res = await request(app)
+  //       .post(linkOrders)
+  //       .set('Authorization', `Bearer ${token}`)
+  //       .send(orderData);
 
-//   it('❌ should block order creation without token', async () => {
-//     await request(app).post(linkLogin).send({ email: wrongEmail, password: correctPassword });
+  //     expect(res.status).toBe(400);
+  //     expect(res.body).toHaveProperty('message');
+  //     expect(res.body.message).toMatch(foreignKeyViolation);
+  //   });
+  // }
 
-//     const orderData = {
-//       customer: 'Anon',
-//       total: 10,
-//       items: [],
-//     };
+  it('❌ invalid quantity', async () => {
+    const orderData = {
+      customer: 'Jan Kowalski',
+      total: 50,
+      items: [{ product_id: 1, quantity: -5 }],
+    };
 
-//     const res = await request(app).post(linkOrders).send(orderData);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//     expect(res.body).toHaveProperty('message');
-//     expect(res.status).toBe(401);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(typeof res.body.message).toBe('string');
-//     expect(res.body.message).toMatch(noTokenProvided);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//   });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'items[0].quantity',
+          constraints: expect.objectContaining({ min: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
 
-//   if (!useMocks) {
-//     it('❌ should not create a new order - missing product', async () => {
-//       const orderData = {
-//         customer: 'Jan Kowalski',
-//         total: 99.99,
-//         items: [{ product_id: 100000, quantity: 2 }],
-//       };
+  it('❌ invalid productId', async () => {
+    const orderData = { customer: 'Jan Kowalski', total: 50, items: [{ quantity: 1 }] };
 
-//       const res = await request(app)
-//         .post(linkOrders)
-//         .set('Authorization', `Bearer ${token}`)
-//         .send(orderData);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//       expect(res.status).toBe(400);
-//       expect(res.body).toHaveProperty('success', false);
-//       expect(res.body).toHaveProperty('message');
-//       expect(typeof res.body.message).toBe('string');
-//       expect(res.body.message).toMatch(foreignKeyViolation);
-//       expect(res.body).toHaveProperty('errors');
-//       expect(Array.isArray(res.body.errors)).toBe(true);
-//     });
-//   }
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'items[0].product_id',
+          constraints: expect.objectContaining({ isInt: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
 
-//   it('✅ should create a new order', async () => {
-//     const orderData = {
-//       customer: 'Jan Kowalski',
-//       total: 99.99,
-//       items: [{ product_id: 1, quantity: 2 }],
-//     };
+  it('❌ invalid customer', async () => {
+    const orderData = { customer: 0, total: 50, items: [{ product_id: 1, quantity: 1 }] };
 
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//     expect(res.status).toBe(200);
-//     expect(res.body).toHaveProperty('orderId');
-//     expect(typeof res.body.orderId).toBe('number');
-//     expect(res.body).toHaveProperty('message', orderCreated);
-//   });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'customer',
+          constraints: expect.objectContaining({ isString: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
 
-//   it('❌ should reject order with invalid quantity (validation test)', async () => {
-//     const orderData = {
-//       customer: 'Jan Kowalski',
-//       total: 50,
-//       items: [{ product_id: 1, quantity: -5 }],
-//     };
+  it('❌ invalid total', async () => {
+    const orderData = {
+      customer: 'Jan Kowalski',
+      total: 'not-a-number',
+      items: [{ product_id: 1, quantity: 1 }],
+    };
 
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(quantity),
-//         }),
-//       ]),
-//     );
-//   });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'total',
+          constraints: expect.objectContaining({ isNumber: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
 
-//   it('✅ should get all orders', async () => {
-//     const res = await request(app).get(linkOrders).set('Authorization', `Bearer ${token}`);
+  it('❌ invalid items (empty array)', async () => {
+    const orderData = { customer: 'Jan Kowalski', total: 1, items: [] };
 
-//     expect(res.status).toBe(200);
-//     expect(Array.isArray(res.body)).toBe(true);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//     if (res.body.length > 0) {
-//       const order = res.body[0];
-//       expect(order).toHaveProperty('id');
-//       expect(order).toHaveProperty('customer');
-//       expect(order).toHaveProperty('total');
-//       expect(order).toHaveProperty('created_at');
-//     }
-//   });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'items',
+          constraints: expect.objectContaining({ arrayMinSize: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
 
-//   it('❌ should reject order with invalid productId (validation test)', async () => {
-//     const orderData = {
-//       customer: 'Jan Kowalski',
-//       total: 50,
-//       items: [{ quantity: 1 }],
-//     };
+  it('❌ completely empty order', async () => {
+    const orderData = {};
 
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
+    const res = await request(app)
+      .post(linkOrders)
+      .set('Authorization', `Bearer ${token}`)
+      .send(orderData);
 
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(productId),
-//         }),
-//       ]),
-//     );
-//   });
-
-//   it('❌ should reject order with invalid customer (validation test)', async () => {
-//     const orderData = {
-//       customer: 0,
-//       total: 50,
-//       items: [{ product_id: 1, quantity: 1 }],
-//     };
-
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
-
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(customer),
-//         }),
-//       ]),
-//     );
-//   });
-
-//   it('❌ should reject order with invalid total (validation test)', async () => {
-//     const orderData = {
-//       customer: 'Jan Kowalski',
-//       total: 'not-a-number',
-//       items: [{ product_id: 1, quantity: 1 }],
-//     };
-
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
-
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(total),
-//         }),
-//       ]),
-//     );
-//   });
-
-//   it('❌ should reject order with invalid items (validation test)', async () => {
-//     const orderData = {
-//       customer: 'Jan Kowalski',
-//       total: 1,
-//       items: [],
-//     };
-
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
-
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(items),
-//         }),
-//       ]),
-//     );
-//   });
-
-//   it('❌ should reject order with invalid order (validation test)', async () => {
-//     const orderData = {};
-
-//     const res = await request(app)
-//       .post(linkOrders)
-//       .set('Authorization', `Bearer ${token}`)
-//       .send(orderData);
-
-//     expect(res.status).toBe(400);
-//     expect(res.body).toHaveProperty('success', false);
-//     expect(res.body).toHaveProperty('message', validateError);
-//     expect(res.body).toHaveProperty('errors');
-//     expect(Array.isArray(res.body.errors)).toBe(true);
-//     expect(res.body.errors).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining({
-//           field: 'unknown',
-//           message: expect.stringMatching(items),
-//         }),
-//       ]),
-//     );
-//   });
-// });
+    expect(res.status).toBe(400);
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'items',
+          constraints: expect.objectContaining({ arrayMinSize: expect.any(String) }),
+        }),
+      ]),
+    );
+  });
+});
