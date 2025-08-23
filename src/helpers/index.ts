@@ -1,8 +1,11 @@
 export class AppError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  errors?: unknown[];
+
+  constructor(status: number, message: string, errors?: unknown[]) {
     super(message);
     this.status = status;
+    if (errors) this.errors = errors;
   }
 }
 

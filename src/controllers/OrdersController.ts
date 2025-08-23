@@ -11,44 +11,27 @@ import {
 } from 'tsoa';
 import { pool } from '../config/db';
 import { PoolClient } from 'pg';
+import type { Request, Response as ExResponse, NextFunction } from 'express';
 import { AppError } from 'src/helpers';
 import {
   createOrderExample,
   getOrderExample,
   INSERT_ORDER,
   INSERT_ORDER_ITEM,
-  invalidTokenMessage,
-  noTokenProvided,
   orderCreated,
   SELECT_ORDER_WITH_ITEMS,
   serverError,
 } from 'src/consts';
-import { IsString, IsNumber, Min, ValidateNested, ArrayMinSize, IsInt } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ErrorResponse } from './AuthController';
 
-export class OrderItem {
-  @IsInt({ message: 'Product ID must be an integer greater than 0' })
-  @Min(1)
-  product_id: number = 0;
-
-  @IsInt({ message: 'Quantity must be an integer greater than 0' })
-  @Min(1)
-  quantity: number = 1;
+export interface OrderItem {
+  product_id: number;
+  quantity: number;
 }
 
-export class CreateOrderBody {
-  @IsString({ message: 'The "customer" field is required and must be a string' })
-  customer: string = '';
-
-  @IsNumber({}, { message: 'Total must be a number greater than 0' })
-  @Min(0.01)
-  total: number = 0.01;
-
-  @ArrayMinSize(1, { message: 'Product list is required' })
-  @ValidateNested({ each: true })
-  @Type(() => OrderItem)
-  items: OrderItem[] = [];
+export interface CreateOrderBody {
+  customer: string;
+  total: number;
+  items: OrderItem[];
 }
 
 export interface CreateOrderResponse {
@@ -75,23 +58,70 @@ interface OrderErrorResponse {
   message: string;
 }
 
+function validateOrder(body: CreateOrderBody): {
+  valid: boolean;
+  errors: { property: string; message: string }[];
+} {
+  const errors: { property: string; message: string }[] = [];
+
+  if (!body || typeof body !== 'object') {
+    errors.push({ property: 'body', message: 'Request body must be an object' });
+    return { valid: false, errors };
+  }
+
+  if (body.customer === undefined || typeof body.customer !== 'string' || !body.customer.trim()) {
+    errors.push({ property: 'customer', message: 'Customer is required and must be a string' });
+  }
+
+  if (body.total === undefined || typeof body.total !== 'number' || body.total <= 0) {
+    errors.push({ property: 'total', message: 'Total must be a number greater than 0' });
+  }
+
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    errors.push({ property: 'items', message: 'Items must be a non-empty array' });
+  } else {
+    body.items.forEach((item: any, index: number) => {
+      if (!Number.isInteger(item.product_id) || item.product_id < 1) {
+        errors.push({
+          property: `items[${index}].product_id`,
+          message: 'Product ID must be an integer > 0',
+        });
+      }
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        errors.push({
+          property: `items[${index}].quantity`,
+          message: 'Quantity must be an integer > 0',
+        });
+      }
+    });
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 @Route('orders')
 export class OrdersController extends Controller {
   @Post()
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<CreateOrderResponse>(createOrderExample)
-  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<OrderErrorResponse>(500, serverError)
-  public async createOrder(@Body() body: CreateOrderBody): Promise<CreateOrderResponse> {
-    const { customer, items, total } = body;
-    const client: PoolClient = await pool.connect();
+  public async createOrder(
+    @Body() body: CreateOrderBody,
+    req: Request,
+    res: ExResponse,
+    next: NextFunction,
+  ): Promise<CreateOrderResponse> {
+    const validation = validateOrder(body);
+    if (!validation.valid) {
+      throw new AppError(400, 'Validation failed', validation.errors);
+    }
 
+    const client: PoolClient = await pool.connect();
     try {
       await client.query('BEGIN');
-      const orderId = await insertOrderWithItems(client, customer, total, items);
+      const orderId = await insertOrderWithItems(client, body.customer, body.total, body.items);
       await client.query('COMMIT');
-
       return { message: orderCreated, orderId };
     } catch (err) {
       await client.query('ROLLBACK');
@@ -105,7 +135,6 @@ export class OrdersController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<OrderWithItems[]>(getOrderExample)
-  @Response<ErrorResponse>(401, noTokenProvided || invalidTokenMessage)
   @Response<OrderErrorResponse>(500, serverError)
   public async getOrders(): Promise<OrderWithItems[]> {
     try {

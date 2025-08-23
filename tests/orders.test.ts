@@ -5,11 +5,12 @@ import {
   linkOrders,
   DELETE_USER,
   INSERT_USER,
+  getUseMocks,
 } from './consts';
-import { noTokenProvided, orderCreated } from 'src/consts';
+import { foreignKeyViolation, noTokenProvided, orderCreated } from 'src/consts';
 
 let token: string;
-// const useMocks = getUseMocks();
+const useMocks = getUseMocks();
 
 import request from 'supertest';
 import app from '../src/app';
@@ -85,24 +86,24 @@ describe('Orders API - with DataBase', () => {
     expect(res.body).toHaveProperty('message', noTokenProvided);
   });
 
-  // if (!useMocks) {
-  //   it('❌ should not create a new order - missing product', async () => {
-  //     const orderData = {
-  //       customer: 'Jan Kowalski',
-  //       total: 99.99,
-  //       items: [{ product_id: 100000, quantity: 2 }],
-  //     };
+  if (!useMocks) {
+    it('❌ should not create a new order - missing product', async () => {
+      const orderData = {
+        customer: 'Jan Kowalski',
+        total: 99.99,
+        items: [{ product_id: 100000, quantity: 2 }],
+      };
 
-  //     const res = await request(app)
-  //       .post(linkOrders)
-  //       .set('Authorization', `Bearer ${token}`)
-  //       .send(orderData);
+      const res = await request(app)
+        .post(linkOrders)
+        .set('Authorization', `Bearer ${token}`)
+        .send(orderData);
 
-  //     expect(res.status).toBe(400);
-  //     expect(res.body).toHaveProperty('message');
-  //     expect(res.body.message).toMatch(foreignKeyViolation);
-  //   });
-  // }
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toMatch(foreignKeyViolation);
+    });
+  }
 
   it('❌ invalid quantity', async () => {
     const orderData = {
@@ -121,7 +122,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items[0].quantity',
-          constraints: expect.objectContaining({ min: expect.any(String) }),
+          message: 'Quantity must be an integer > 0',
         }),
       ]),
     );
@@ -140,7 +141,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items[0].product_id',
-          constraints: expect.objectContaining({ isInt: expect.any(String) }),
+          message: 'Product ID must be an integer > 0',
         }),
       ]),
     );
@@ -159,7 +160,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'customer',
-          constraints: expect.objectContaining({ isString: expect.any(String) }),
+          message: 'Customer is required and must be a string',
         }),
       ]),
     );
@@ -182,7 +183,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'total',
-          constraints: expect.objectContaining({ isNumber: expect.any(String) }),
+          message: 'Total must be a number greater than 0',
         }),
       ]),
     );
@@ -201,7 +202,7 @@ describe('Orders API - with DataBase', () => {
       expect.arrayContaining([
         expect.objectContaining({
           property: 'items',
-          constraints: expect.objectContaining({ arrayMinSize: expect.any(String) }),
+          message: 'Items must be a non-empty array',
         }),
       ]),
     );
@@ -219,8 +220,12 @@ describe('Orders API - with DataBase', () => {
     expect(res.body.details).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          property: 'customer',
+          message: 'Customer is required and must be a string',
+        }),
+        expect.objectContaining({
           property: 'items',
-          constraints: expect.objectContaining({ arrayMinSize: expect.any(String) }),
+          message: 'Items must be a non-empty array',
         }),
       ]),
     );
