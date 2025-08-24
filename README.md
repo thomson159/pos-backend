@@ -1,5 +1,7 @@
 # POS Backend (Express + TypeScript + PostgreSQL)
 
+## https://pos-backend-kso1.onrender.com/api-docs/
+
 A simple backend for a **POS** application for Anna – boutique owner
 (FakeStoreAPI → sync to local database → orders).
 Stack: **Express + TS**, **PostgreSQL**, **JWT**, **Swagger**, **Jest + Supertest**. **TSOA**
@@ -81,7 +83,10 @@ npm install
 # 3) Configure .env based on .env.example
 cp .env.example .env
 
-# 4) Start dev server
+# 4) Generate routes and swagger
+npm run tsoa:build
+
+# 5) Start dev server
 npm run dev
 ```
 
