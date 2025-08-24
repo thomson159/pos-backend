@@ -15,8 +15,6 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-swaggerSpec.security = [{ bearerAuth: [] }];
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // app.use(
@@ -27,11 +25,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 RegisterRoutes(app);
 
-// tsoa error handler response
+// tsoa error handler response - wrong type
 app.use(function (err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof ValidateError) {
     return res.status(400).json({
-      success: false,
       message: validationFailed,
       details: err.fields,
     });

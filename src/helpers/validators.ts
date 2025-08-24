@@ -1,3 +1,5 @@
+import { CreateOrder, OrderItem } from 'src/controllers/OrdersController';
+
 export const customer = 'The "customer" field is required and must be a string (1–255 chars)';
 export const total = 'Total must be a number greater than 0';
 export const productId = 'Product ID must be an integer greater than 0';
@@ -8,7 +10,7 @@ export const createdAt = 'The "created_at" field cannot be set manually';
 
 export const validationFailed = 'Validation failed';
 
-export function validateOrder(body: any): {
+export function validateOrder(body: CreateOrder): {
   valid: boolean;
   errors: { property: string; message: string }[];
 } {
@@ -39,7 +41,7 @@ export function validateOrder(body: any): {
   } else {
     const productIds = new Set<number>();
 
-    body.items.forEach((item: any, index: number) => {
+    body.items.forEach((item: OrderItem, index: number) => {
       if (!Number.isInteger(item.product_id) || item.product_id < 1) {
         errors.push({
           property: `items[${index}].product_id`,
@@ -72,13 +74,6 @@ export function validateOrder(body: any): {
         message: total,
       });
     }
-  }
-
-  if (body.created_at !== undefined) {
-    errors.push({
-      property: 'created_at',
-      message: createdAt,
-    });
   }
 
   return { valid: errors.length === 0, errors };

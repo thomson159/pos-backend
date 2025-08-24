@@ -1,7 +1,7 @@
 {
   "name": "pos-backend",
   "description": "A simple POS application for both brick-and-mortar and online stores",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "commonjs",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

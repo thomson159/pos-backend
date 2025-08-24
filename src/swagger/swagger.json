@@ -1,643 +1,632 @@
 {
-	"openapi": "3.0.0",
-	"components": {
-		"examples": {},
-		"headers": {},
-		"parameters": {},
-		"requestBodies": {},
-		"responses": {},
-		"schemas": {
-			"LoginSuccess": {
-				"properties": {
-					"token": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"token"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ErrorResponse401": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"success": {
-						"type": "boolean",
-						"enum": [
-							false
-						],
-						"nullable": false
-					},
-					"details": {
-						"items": {},
-						"type": "array"
-					}
-				},
-				"required": [
-					"message",
-					"success"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ErrorResponse500": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"success": {
-						"type": "boolean",
-						"enum": [
-							false
-						],
-						"nullable": false
-					},
-					"details": {
-						"items": {},
-						"type": "array"
-					}
-				},
-				"required": [
-					"message",
-					"success"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"LoginBody": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"password"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CreateOrderSuccess": {
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"orderId": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"message",
-					"orderId"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"OrderItem": {
-				"properties": {
-					"product_id": {
-						"type": "number",
-						"format": "double"
-					},
-					"quantity": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"product_id",
-					"quantity"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CreateOrder": {
-				"properties": {
-					"customer": {
-						"type": "string"
-					},
-					"total": {
-						"type": "number",
-						"format": "double"
-					},
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/OrderItem"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"customer",
-					"total",
-					"items"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"OrderItemDetails": {
-				"properties": {
-					"product_id": {
-						"type": "number",
-						"format": "double"
-					},
-					"quantity": {
-						"type": "number",
-						"format": "double"
-					},
-					"product_name": {
-						"type": "string"
-					},
-					"product_price": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"product_id",
-					"quantity",
-					"product_name",
-					"product_price"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"OrderWithItems": {
-				"properties": {
-					"id": {
-						"type": "number",
-						"format": "double"
-					},
-					"customer": {
-						"type": "string"
-					},
-					"total": {
-						"type": "number",
-						"format": "double"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"items": {
-						"items": {
-							"$ref": "#/components/schemas/OrderItemDetails"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"id",
-					"customer",
-					"total",
-					"created_at",
-					"items"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Product": {
-				"properties": {
-					"id": {
-						"type": "number",
-						"format": "double"
-					},
-					"title": {
-						"type": "string"
-					},
-					"price": {
-						"type": "number",
-						"format": "double"
-					},
-					"category": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"image": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"title",
-					"price",
-					"category",
-					"description",
-					"image"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"SyncSuccess": {
-				"properties": {
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"message"
-				],
-				"type": "object"
-			}
-		},
-		"securitySchemes": {
-			"bearerAuth": {
-				"type": "http",
-				"scheme": "bearer",
-				"bearerFormat": "JWT"
-			}
-		}
-	},
-	"info": {
-		"title": "pos-backend",
-		"version": "1.0.0",
-		"description": "A simple POS application for both brick-and-mortar and online stores",
-		"contact": {}
-	},
-	"paths": {
-		"/auth/login": {
-			"post": {
-				"operationId": "Login",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/LoginSuccess"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"token": "$2b$10$bzj9VHtKqTuah3kEqDgC4eEyqv7p0HDHS7L.UEBEZv1889YObizsi"
-										}
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Invalid credentials",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/LoginBody"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/orders": {
-			"post": {
-				"operationId": "CreateOrder",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/CreateOrderSuccess"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Order created",
-											"orderId": 1
-										}
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "No token provided",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateOrder"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "GetOrders",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/OrderWithItems"
-									},
-									"type": "array"
-								},
-								"examples": {
-									"Example 1": {
-										"value": [
-											{
-												"id": 1,
-												"customer": "John Doe",
-												"total": 150,
-												"created_at": "2025-08-22T12:34:56Z",
-												"items": [
-													{
-														"product_id": 1,
-														"quantity": 2,
-														"product_name": "Pen",
-														"product_price": 50
-													},
-													{
-														"product_id": 2,
-														"quantity": 1,
-														"product_name": "Notebook",
-														"product_price": 50
-													}
-												]
-											},
-											{
-												"id": 2,
-												"customer": "John Doe",
-												"total": 150,
-												"created_at": "2025-08-22T12:34:56Z",
-												"items": [
-													{
-														"product_id": 3,
-														"quantity": 2,
-														"product_name": "Book",
-														"product_price": 50
-													}
-												]
-											}
-										]
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "No token provided",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/products/remote": {
-			"get": {
-				"operationId": "GetRemoteProducts",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/Product"
-									},
-									"type": "array"
-								},
-								"examples": {
-									"Example 1": {
-										"value": [
-											{
-												"id": 1,
-												"title": "Pen",
-												"price": 10,
-												"category": "Standard",
-												"description": "Super pen",
-												"image": "pen"
-											}
-										]
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "No token provided",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/products/local": {
-			"get": {
-				"operationId": "GetLocalProducts",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/Product"
-									},
-									"type": "array"
-								},
-								"examples": {
-									"Example 1": {
-										"value": [
-											{
-												"id": 1,
-												"title": "Pen",
-												"price": 10,
-												"category": "Standard",
-												"description": "Super pen",
-												"image": "pen"
-											}
-										]
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "No token provided",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/products/sync": {
-			"post": {
-				"operationId": "SyncProducts",
-				"responses": {
-					"200": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/SyncSuccess"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Sync Success"
-										}
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "No token provided",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse401"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "A server error occurred",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse500"
-								}
-							}
-						}
-					}
-				},
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": []
-			}
-		}
-	},
-	"servers": [
-		{
-			"url": "/api"
-		}
-	]
+  "openapi": "3.0.0",
+  "components": {
+    "examples": {},
+    "headers": {},
+    "parameters": {},
+    "requestBodies": {},
+    "responses": {},
+    "schemas": {
+      "LoginSuccess": {
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": ["token"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "FieldErrors": {
+        "properties": {},
+        "type": "object",
+        "additionalProperties": {
+          "properties": {
+            "value": {},
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": ["message"],
+          "type": "object"
+        }
+      },
+      "ErrorResponse400": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/FieldErrors"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["message", "details"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ErrorResponse401": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/FieldErrors"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["message", "details"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ErrorResponse500": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/FieldErrors"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["message", "details"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LoginBody": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "password"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateOrderSuccess": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["message", "orderId"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "OrderItem": {
+        "properties": {
+          "product_id": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["product_id", "quantity"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "CreateOrder": {
+        "properties": {
+          "customer": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["customer", "total", "items"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "OrderItemDetails": {
+        "properties": {
+          "product_id": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "product_price": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["product_id", "quantity", "product_name", "product_price"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "OrderWithItems": {
+        "properties": {
+          "id": {
+            "type": "number",
+            "format": "double"
+          },
+          "customer": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDetails"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["id", "customer", "total", "created_at", "items"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "Product": {
+        "properties": {
+          "id": {
+            "type": "number",
+            "format": "double"
+          },
+          "title": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "price", "category", "description", "image"],
+        "type": "object",
+        "additionalProperties": false
+      },
+      "SyncSuccess": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "info": {
+    "title": "pos-backend",
+    "version": "1.0.1",
+    "description": "A simple POS application for both brick-and-mortar and online stores",
+    "contact": {}
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccess"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "token": "$2b$10$bzj9VHtKqTuah3kEqDgC4eEyqv7p0HDHS7L.UEBEZv1889YObizsi"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "operationId": "CreateOrder",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrderSuccess"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Order created",
+                      "orderId": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrder"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetOrders",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrderWithItems"
+                  },
+                  "type": "array"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": [
+                      {
+                        "id": 1,
+                        "customer": "John Doe",
+                        "total": 150,
+                        "created_at": "2025-08-22T12:34:56Z",
+                        "items": [
+                          {
+                            "product_id": 1,
+                            "quantity": 2,
+                            "product_name": "Pen",
+                            "product_price": 50
+                          },
+                          {
+                            "product_id": 2,
+                            "quantity": 1,
+                            "product_name": "Notebook",
+                            "product_price": 50
+                          }
+                        ]
+                      },
+                      {
+                        "id": 2,
+                        "customer": "John Doe",
+                        "total": 150,
+                        "created_at": "2025-08-22T12:34:56Z",
+                        "items": [
+                          {
+                            "product_id": 3,
+                            "quantity": 2,
+                            "product_name": "Book",
+                            "product_price": 50
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/products/remote": {
+      "get": {
+        "operationId": "GetRemoteProducts",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "type": "array"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": [
+                      {
+                        "id": 1,
+                        "title": "Pen",
+                        "price": 10,
+                        "category": "Standard",
+                        "description": "Super pen",
+                        "image": "pen"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/products/local": {
+      "get": {
+        "operationId": "GetLocalProducts",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "type": "array"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": [
+                      {
+                        "id": 1,
+                        "title": "Pen",
+                        "price": 10,
+                        "category": "Standard",
+                        "description": "Super pen",
+                        "image": "pen"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/products/sync": {
+      "post": {
+        "operationId": "SyncProducts",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncSuccess"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Sync Success"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": []
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ]
 }

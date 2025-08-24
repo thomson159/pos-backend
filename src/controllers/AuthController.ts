@@ -1,21 +1,34 @@
-import { Route, Post, Controller, SuccessResponse, Response, Body, Example } from 'tsoa';
+import {
+  Route,
+  Post,
+  Controller,
+  SuccessResponse,
+  Response,
+  Body,
+  Example,
+  FieldErrors,
+} from 'tsoa';
 import { pool } from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/env';
 import { UserDb, invalidCredentials, SELECT_AUTH, serverError } from '../consts';
 import { AppError } from '../helpers';
+import { validationFailed } from '../helpers/validators';
+
+export interface ErrorResponse400 {
+  message: string; // validationFailed
+  details: FieldErrors[];
+}
 
 export interface ErrorResponse401 {
-  message: string;
-  success: false;
-  details?: any[];
+  message: string; // invalidCredentials
+  details: FieldErrors[];
 }
 
 export interface ErrorResponse500 {
-  message: string;
-  success: false;
-  details?: any[];
+  message: string; // serverError
+  details: FieldErrors[];
 }
 
 interface LoginSuccess {
@@ -32,10 +45,11 @@ export class AuthController extends Controller {
   @Post('login')
   @Example<LoginSuccess>({ token: '$2b$10$bzj9VHtKqTuah3kEqDgC4eEyqv7p0HDHS7L.UEBEZv1889YObizsi' })
   @SuccessResponse(200)
+  @Response<ErrorResponse400>(400, validationFailed)
   @Response<ErrorResponse401>(401, invalidCredentials)
   @Response<ErrorResponse500>(500, serverError)
-  public async login(@Body() requestBody: LoginBody): Promise<LoginSuccess> {
-    const { email, password } = requestBody;
+  public async login(@Body() body: LoginBody): Promise<LoginSuccess> {
+    const { email, password } = body;
 
     try {
       const result = await pool.query<UserDb>(SELECT_AUTH, [email]);

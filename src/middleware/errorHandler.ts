@@ -27,7 +27,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     }));
 
     return res.status(400).json({
-      success: false,
       message: validateError,
       details,
     });
@@ -44,7 +43,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     if (mapping) {
       return res
         .status(mapping.status)
-        .json({ success: false, message: mapping.message, details: pgErr.errors || [] });
+        .json({ message: mapping.message, details: pgErr.errors || [] });
     }
   }
 
@@ -52,13 +51,12 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     const appErr = err as AppError & { errors?: unknown[] };
     const details =
       Array.isArray(appErr.errors) && appErr.errors.length > 0
-        ? appErr.errors.map((e: any) => ({
-            property: e.property,
-            message: e.message,
+        ? appErr.errors.map((e) => ({
+            property: (e as { property: string; message: string }).property,
+            message: (e as { property: string; message: string }).message,
           }))
         : [];
     return res.status(appErr.status || 400).json({
-      success: false,
       message: appErr.message || requestError,
       details,
     });
@@ -66,7 +64,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
 
   const unknownErr = err as { errors?: unknown[] };
   res.status(500).json({
-    success: false,
     message: serverError,
     details: unknownErr.errors || [],
   });
