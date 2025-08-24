@@ -11,30 +11,29 @@ import {
 } from 'tsoa';
 import { pool } from '../config/db';
 import { PoolClient } from 'pg';
-import type { Request, Response as ExResponse, NextFunction } from 'express';
-import { AppError, fetchOrdersWithItems, insertOrderWithItems } from 'src/helpers';
+import { AppError, fetchOrdersWithItems, insertOrderWithItems } from '../helpers';
 import {
   createOrderExample,
   getOrderExample,
   noTokenProvided,
   orderCreated,
   serverError,
-} from 'src/consts';
-import { validateOrder, validationFailed } from 'src/helpers/validators';
-import { ErrorResponse } from './AuthController';
+} from '../consts';
+import { validateOrder, validationFailed } from '../helpers/validators';
+import { ErrorResponse401, ErrorResponse500 } from './AuthController';
 
 export interface OrderItem {
   product_id: number;
   quantity: number;
 }
 
-export interface CreateOrderBody {
+export interface CreateOrder {
   customer: string;
   total: number;
   items: OrderItem[];
 }
 
-export interface CreateOrderResponse {
+export interface CreateOrderSuccess {
   message: string;
   orderId: number;
 }
@@ -54,20 +53,15 @@ export interface OrderWithItems {
   items: OrderItemDetails[];
 }
 
-interface OrderErrorResponse {
-  message: string;
-}
-
 @Route('orders')
 export class OrdersController extends Controller {
   @Post()
   @Security('bearerAuth')
   @SuccessResponse(200)
-  @Example<CreateOrderResponse>(createOrderExample)
-  // @Response<ErrorResponse>(400, noTokenProvided) //TODO: response 400
-  @Response<ErrorResponse>(401, noTokenProvided)
-  @Response<OrderErrorResponse>(500, serverError)
-  public async createOrder(@Body() body: CreateOrderBody): Promise<CreateOrderResponse> {
+  @Example<CreateOrderSuccess>(createOrderExample)
+  @Response<ErrorResponse401>(401, noTokenProvided)
+  @Response<ErrorResponse500>(500, serverError)
+  public async createOrder(@Body() body: CreateOrder): Promise<CreateOrderSuccess> {
     const validation = validateOrder(body);
     if (!validation.valid) {
       throw new AppError(400, validationFailed, validation.errors);
@@ -91,8 +85,8 @@ export class OrdersController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<OrderWithItems[]>(getOrderExample)
-  @Response<ErrorResponse>(401, noTokenProvided)
-  @Response<OrderErrorResponse>(500, serverError)
+  @Response<ErrorResponse401>(401, noTokenProvided)
+  @Response<ErrorResponse500>(500, serverError)
   public async getOrders(): Promise<OrderWithItems[]> {
     try {
       return await fetchOrdersWithItems();

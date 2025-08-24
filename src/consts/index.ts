@@ -1,7 +1,7 @@
 import { JwtPayload } from 'jsonwebtoken';
 import { Request } from 'express';
-import { OrderWithItems, CreateOrderResponse } from 'src/controllers/OrdersController';
-import { Product } from 'src/controllers/ProductsController';
+import { OrderWithItems, CreateOrderSuccess } from '../controllers/OrdersController';
+import { Product } from '../controllers/ProductsController';
 
 export const fakestoreapi = 'https://fakestoreapi.com/products';
 
@@ -18,7 +18,7 @@ export const foreignKeyViolation =
 export const uniqueViolation = 'The provided value must be unique. This record already exists.';
 export const notNullViolation = 'A required value is missing in one of the fields.';
 export const invalidTextRepresentation = 'Invalid value format provided (e.g. ID).';
-export const syncSuccess = 'OK';
+export const syncSuccess = 'Sync Success';
 export const orderCreated = 'Order created';
 
 export const SELECT_AUTH = 'SELECT * FROM users WHERE email = $1';
@@ -72,33 +72,6 @@ export type PgError = {
   [key: string]: unknown;
 };
 
-export type SwaggerOptionsType = {
-  definition: {
-    openapi: '3.0.0';
-    info: {
-      title: string;
-      version: string;
-      description: string;
-    };
-    servers: {
-      url: string;
-    }[];
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http';
-          scheme: 'bearer';
-          bearerFormat: string;
-        };
-      };
-    };
-    security: {
-      bearerAuth: string[];
-    }[];
-  };
-  apis: string[];
-};
-
 export const getProductsExample: Product[] = [
   {
     id: 1,
@@ -130,4 +103,4 @@ export const getOrderExample: OrderWithItems[] = [
   },
 ];
 
-export const createOrderExample: CreateOrderResponse = { message: orderCreated, orderId: 1 };
+export const createOrderExample: CreateOrderSuccess = { message: orderCreated, orderId: 1 };

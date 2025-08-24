@@ -6,8 +6,8 @@ import {
   invalidTokenMessage,
   TokenPayload,
   AuthenticatedRequest,
-} from 'src/consts';
-import { HttpError } from 'src/helpers';
+} from '../consts';
+import { HttpError } from '../helpers';
 
 export async function expressAuthentication(
   req: AuthenticatedRequest,

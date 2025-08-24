@@ -1,7 +1,7 @@
 import { PoolClient } from 'pg';
-import { pool } from 'src/config/db';
-import { INSERT_ORDER, INSERT_ORDER_ITEM, SELECT_ORDER_WITH_ITEMS } from 'src/consts';
-import { OrderItem, OrderWithItems } from 'src/controllers/OrdersController';
+import { pool } from '../config/db';
+import { INSERT_ORDER, INSERT_ORDER_ITEM, SELECT_ORDER_WITH_ITEMS } from '../consts';
+import { OrderItem, OrderWithItems } from '../controllers/OrdersController';
 
 export class AppError extends Error {
   status: number;

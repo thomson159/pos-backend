@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:mock": "USE_MOCKS=true jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles",

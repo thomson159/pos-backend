@@ -9,9 +9,9 @@ import {
   SELECT_PRODUCT,
   serverError,
   syncSuccess,
-} from 'src/consts';
-import { AppError } from 'src/helpers';
-import { ErrorResponse } from './AuthController';
+} from '../consts';
+import { AppError } from '../helpers';
+import { ErrorResponse401, ErrorResponse500 } from './AuthController';
 
 export interface Product {
   id: number;
@@ -22,11 +22,7 @@ export interface Product {
   image: string;
 }
 
-interface ProductErrorResponse {
-  message: string;
-}
-
-type SyncSuccessResponse = {
+type SyncSuccess = {
   message: string;
 };
 
@@ -36,8 +32,8 @@ export class ProductsController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<Product[]>(getProductsExample)
-  @Response<ErrorResponse>(401, noTokenProvided)
-  @Response<ProductErrorResponse>(500, serverError)
+  @Response<ErrorResponse401>(401, noTokenProvided)
+  @Response<ErrorResponse500>(500, serverError)
   public async getRemoteProducts(): Promise<Product[]> {
     try {
       const { data } = await axios.get<Product[]>(fakestoreapi);
@@ -51,8 +47,8 @@ export class ProductsController extends Controller {
   @Security('bearerAuth')
   @SuccessResponse(200)
   @Example<Product[]>(getProductsExample)
-  @Response<ErrorResponse>(401, noTokenProvided)
-  @Response<ProductErrorResponse>(500, serverError)
+  @Response<ErrorResponse401>(401, noTokenProvided)
+  @Response<ErrorResponse500>(500, serverError)
   public async getLocalProducts(): Promise<Product[]> {
     try {
       const result = await pool.query<Product>(SELECT_PRODUCT);
@@ -65,10 +61,10 @@ export class ProductsController extends Controller {
   @Post('sync')
   @Security('bearerAuth')
   @SuccessResponse(200)
-  @Example<SyncSuccessResponse>({ message: syncSuccess })
-  @Response<ErrorResponse>(401, noTokenProvided)
-  @Response<ProductErrorResponse>(500, serverError)
-  public async syncProducts(): Promise<SyncSuccessResponse> {
+  @Example<SyncSuccess>({ message: syncSuccess })
+  @Response<ErrorResponse401>(401, noTokenProvided)
+  @Response<ErrorResponse500>(500, serverError)
+  public async syncProducts(): Promise<SyncSuccess> {
     try {
       const { data } = await axios.get<Product[]>(fakestoreapi);
 

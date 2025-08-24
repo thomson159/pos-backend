@@ -9,8 +9,8 @@ import {
   serverError,
   uniqueViolation,
   validateError,
-} from 'src/consts';
-import { AppError } from 'src/helpers';
+} from '../consts';
+import { AppError } from '../helpers';
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   const pgErrorMap: Record<string, { status: number; message: string }> = {
