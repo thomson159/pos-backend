@@ -4,6 +4,7 @@
   "version": "1.0.1",
   "type": "commonjs",
   "scripts": {
+    "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:mock": "USE_MOCKS=true jest --passWithNoTests --runInBand --detectOpenHandles",
