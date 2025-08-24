@@ -12,7 +12,7 @@
     "tsoa:routes": "tsoa routes",
     "tsoa:spec": "tsoa spec",
     "tsoa:build": "tsoa routes & tsoa spec",
-    "build": "npm run tsoa:routes && npm run tsoa:spec && tsc"
+    "build": "npm run tsoa:routes && npm run tsoa:spec && tsc && mkdir -p dist/src/swagger && cp src/swagger/swagger.json dist/src/swagger/swagger.json"
   },
   "dependencies": {
     "axios": "^1.11.0",
