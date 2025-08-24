@@ -12,7 +12,7 @@
     "tsoa:routes": "tsoa routes",
     "tsoa:spec": "tsoa spec",
     "tsoa:build": "tsoa routes & tsoa spec",
-    "build": "tsc && npm run tsoa:routes && npm run tsoa:spec"
+    "build": "npm run tsoa:routes && npm run tsoa:spec && tsc"
   },
   "dependencies": {
     "axios": "^1.11.0",
