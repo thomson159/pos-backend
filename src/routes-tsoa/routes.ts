@@ -9,8 +9,6 @@ import { AuthController } from './../controllers/AuthController';
 import { OrdersController } from './../controllers/OrdersController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ProductsController } from './../controllers/ProductsController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { HelloController } from './../controllers/HelloController';
 import { expressAuthentication } from './../middleware/auth';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -319,35 +317,6 @@ export function RegisterRoutes(app: Router) {
                 next,
                 validatedArgs,
                 successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsHelloController_getHello: Record<string, TsoaRoute.ParameterSchema> = {
-        };
-        app.get('/api/hello',
-            ...(fetchMiddlewares<RequestHandler>(HelloController)),
-            ...(fetchMiddlewares<RequestHandler>(HelloController.prototype.getHello)),
-
-            async function HelloController_getHello(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsHelloController_getHello, request, response });
-
-                const controller = new HelloController();
-
-              await templateService.apiHandler({
-                methodName: 'getHello',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
               });
             } catch (err) {
                 return next(err);

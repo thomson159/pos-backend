@@ -8,7 +8,6 @@ import { ValidateError } from '@tsoa/runtime';
 import { validationFailed } from './helpers/validators';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
-// import * as swaggerDocument from './swagger/swagger.json';
 
 const app = express();
 
@@ -16,11 +15,13 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+swaggerSpec.security = [{ bearerAuth: [] }];
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // app.use(
 //   cors({
-//     origin: 'http://localhost:5000', // lub frontendowego adresu
+//     origin: 'http://localhost:5000',
 //   }),
 // );
 

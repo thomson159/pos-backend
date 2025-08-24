@@ -1,0 +1,143 @@
+{
+  "components": {
+    "schemas": {
+      "SyncSuccess": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        },
+        "example": {
+          "message": "Sync Success"
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "title": { "type": "string" },
+          "price": { "type": "number" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "image": { "type": "string" }
+        },
+        "example": {
+          "id": 1,
+          "title": "Pen",
+          "price": 5,
+          "category": "Paper",
+          "description": "Super Pen",
+          "image": "image.png"
+        }
+      },
+      "OrderWithItems": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "customer": { "type": "string" },
+          "total": { "type": "number" },
+          "created_at": { "type": "string" },
+          "items": {
+            "type": "array",
+            "product_id": { "type": "number" },
+            "quantity": { "type": "number" },
+            "product_name": { "type": "string" },
+            "product_price": { "type": "number" }
+          }
+        },
+        "example": {
+          "id": 1,
+          "customer": "Johe Doe",
+          "total": 10,
+          "created_at": "2025-08-22T12:34:56Z",
+          "items": {
+            "product_id": 1,
+            "quantity": 2,
+            "product_name": "Pen",
+            "product_price": 5
+          }
+        }
+      },
+      "CreateOrderSuccess": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "orderId": { "type": "number" }
+        },
+        "example": {
+          "message": "Order created",
+          "orderId": 1
+        }
+      },
+      "CreateOrder": {
+        "type": "object",
+        "properties": {
+          "customer": { "type": "string" },
+          "total": { "type": "number" },
+          "items": {
+            "type": "array",
+            "product_id": { "type": "number" },
+            "quantity": { "type": "number" },
+            "product_name": { "type": "string" },
+            "product_price": { "type": "number" }
+          }
+        },
+        "example": {
+          "customer": "Johe Doe",
+          "total": 10,
+          "items": {
+            "product_id": 1,
+            "quantity": 2,
+            "product_name": "Pen",
+            "product_price": 5
+          }
+        }
+      },
+      "LoginSuccess": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" }
+        },
+        "example": {
+          "token": "$2b$10$bzj9VHtKqTuah3kEqDgC4eEyqv7p0HDHS7L.UEBEZv1889YObizsi"
+        }
+      },
+      "LoginBody": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "example": {
+          "email": "anna@posdemo.pl",
+          "password": "test1234"
+        }
+      },
+      "ErrorResponse401": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "success": { "type": "boolean" },
+          "details": { "type": "array", "items": { "type": "string" } }
+        },
+        "example": {
+          "message": "Invalid credentials",
+          "success": false,
+          "details": []
+        }
+      },
+      "ErrorResponse500": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "success": { "type": "boolean" },
+          "details": { "type": "array", "items": { "type": "string" } }
+        },
+        "example": {
+          "message": "A server error occurred",
+          "success": false,
+          "details": []
+        }
+      }
+    }
+  }
+}
