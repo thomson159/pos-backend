@@ -12,3 +12,18 @@ export const linkOrders = '/api/orders';
 
 export const correctPassword = 'test1234'; // schema.sql
 export const correctEmail = 'anna@posdemo.pl'; // schema.sql
+
+export const error = 'Database query error:';
+export const user = 'Users in the database:';
+
+export const SELECT_USERS = 'SELECT * FROM users';
+export const DELETE_USER = `DELETE FROM users WHERE email = $1`;
+export const INSERT_USER = `
+        INSERT INTO users (email, password)
+        VALUES ($1, $2)
+        ON CONFLICT (email) DO NOTHING
+      `;
+
+export const invalidFloat = 'invalid float number';
+export const invalidObject = 'invalid object';
+export const invalidString = 'invalid string value';

@@ -1,0 +1,32 @@
+{
+  "entryFile": "src/app.ts",
+  "validate": true,
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/*.ts"],
+  "spec": {
+    "basePath": "/api",
+    "outputDirectory": "src/swagger",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "routes": {
+    "basePath": "/api",
+    "validateModels": true,
+    "routesDir": "src/routes-tsoa",
+    "routesFileName": "routes.ts",
+    "authenticationModule": "src/middleware/auth.ts",
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

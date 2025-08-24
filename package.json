@@ -1,17 +1,24 @@
 {
   "name": "pos-backend",
   "description": "A simple POS application for both brick-and-mortar and online stores",
-  "version": "1.0.0",
-  "type": "module",
+  "version": "1.0.1",
+  "type": "commonjs",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "start": "node dist/src/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:mock": "USE_MOCKS=true jest --passWithNoTests --runInBand --detectOpenHandles",
-    "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles"
+    "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles",
+    "tsoa:routes": "tsoa routes",
+    "tsoa:spec": "tsoa spec",
+    "tsoa:build": "tsoa routes & tsoa spec",
+    "build": "npm run tsoa:routes && npm run tsoa:spec && tsc && mkdir -p dist/src/swagger && cp src/swagger/swagger.json dist/src/swagger/swagger.json"
   },
   "dependencies": {
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
@@ -20,7 +27,8 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tsoa": "^6.6.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
