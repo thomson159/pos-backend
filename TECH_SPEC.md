@@ -1,67 +1,30 @@
-# POS Backend – Specyfikacja techniczna
+# POS Backend – Technical Specification
 
-## 1. Stack technologiczny
+## 1. Technology Stack
 
 - Node.js 18+
 - Express + TypeScript
 - PostgreSQL 14+
 - JWT (jsonwebtoken)
-- Jest + Supertest (testy)
-- Swagger-jsdoc + Swagger UI
+- Jest + Supertest (tests)
+- TSOA + Swagger-jsdoc + Swagger UI
 - Docker + docker-compose
 
-## 3. Bezpieczeństwo
+## 3. Security
 
-- JWT w nagłówku `Authorization: Bearer <token>`.
-- Hasła hashowane bcryptem.
+- JWT in the header `Authorization: Bearer <token>`.
+- Passwords hashed with bcrypt.
 - Helmet + CORS.
-- express-validator dla walidacji requestów.
+- express-validator for request validation.
 
-## 4. Testy
+## 4. Tests
 
-- `auth.test.ts` – logowanie (OK / błędne dane)
-- `products.test.ts` – pobieranie i sync produktów
-- `orders.test.ts` – tworzenie i pobieranie zamówień
+- `login.test.ts` – login (valid / invalid data)
+- `products.test.ts` – fetching and syncing products
+- `orders.test.ts` – creating and fetching orders
 
-## 5. Deploy
+## 5. Deployment
 
 - Render / Railway (Node)
 - Railway / Neon / Supabase (PostgreSQL)
-- Zmienne środowiskowe w `.env` (PORT, DATABASE_URL, JWT_SECRET).
-
-erDiagram
-USERS ||--o{ ORDERS : "creates"
-ORDERS ||--o{ ORDER_ITEMS : "has"
-PRODUCTS ||--o{ ORDER_ITEMS : "referenced in"
-
-    USERS {
-      int id PK
-      string email UK
-      string password
-      string role
-      timestamp created_at
-    }
-
-    PRODUCTS {
-      int id PK
-      string title
-      decimal price
-      string category
-      string description
-      string image
-      timestamp created_at
-    }
-
-    ORDERS {
-      int id PK
-      string customer
-      decimal total
-      timestamp created_at
-    }
-
-    ORDER_ITEMS {
-      int id PK
-      int order_id FK
-      int product_id FK
-      int quantity
-    }
+- Environment variables in `.env` (PORT, DATABASE_URL, JWT_SECRET).
