@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/src/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "test": "jest --passWithNoTests --runInBand --detectOpenHandles",
+    "test": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:mock": "USE_MOCKS=true jest --passWithNoTests --runInBand --detectOpenHandles",
     "test:db": "USE_MOCKS=false jest --passWithNoTests --runInBand --detectOpenHandles",
     "tsoa:routes": "tsoa routes",
